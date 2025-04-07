@@ -1,0 +1,24 @@
+@startuml
+title Патерн Memento - UML Діаграма
+
+class Originator {
+    - state: String
+    + createMemento(): Memento
+    + restore(m: Memento): void
+}
+
+class Memento {
+    - state: String
+    + getState(): String
+}
+
+class Caretaker {
+    - memento: Memento
+    + setMemento(m: Memento): void
+    + getMemento(): Memento
+}
+
+Originator --> Memento : створює / використовує
+Caretaker --> Memento : зберігає
+@enduml
+
