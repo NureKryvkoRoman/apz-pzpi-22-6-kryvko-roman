@@ -1,1 +1,4 @@
-export default "./GreenhouseAutomation.jsx";
+const GreenhouseAutomation = () => {
+  return null
+}
+export default GreenhouseAutomation;
