@@ -1,0 +1,1 @@
+export default "./GreenhouseAutomation.jsx";
