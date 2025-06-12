@@ -5,9 +5,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import ua.nure.kryvko.roman.apz.sensor.Sensor;
+import ua.nure.kryvko.roman.apz.sensor.SensorRepository;
+import ua.nure.kryvko.roman.apz.sensor.SensorType;
+import ua.nure.kryvko.roman.apz.sensorState.SensorState;
+import ua.nure.kryvko.roman.apz.sensorState.SensorStateRepository;
 import ua.nure.kryvko.roman.apz.user.User;
 import ua.nure.kryvko.roman.apz.user.UserRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,11 +25,78 @@ public class GreenhouseService {
 
     private final GreenhouseRepository greenhouseRepository;
     private final UserRepository userRepository;
+    private final SensorStateRepository sensorStateRepository;
+    private final SensorRepository sensorRepository;
 
     @Autowired
-    public GreenhouseService(GreenhouseRepository greenhouseRepository, UserRepository userRepository) {
+    public GreenhouseService(GreenhouseRepository greenhouseRepository,
+                             UserRepository userRepository,
+                             SensorStateRepository sensorStateRepository,
+                             SensorRepository sensorRepository) {
         this.greenhouseRepository = greenhouseRepository;
         this.userRepository = userRepository;
+        this.sensorStateRepository = sensorStateRepository;
+        this.sensorRepository = sensorRepository;
+    }
+
+    public double calculateGDD(int greenhouseId, double baseTemperature, LocalDate from, LocalDate to) {
+        List<Sensor> tempSensors = sensorRepository.findByGreenhouseIdAndSensorType(greenhouseId, SensorType.TEMPERATURE);
+        if (tempSensors.isEmpty()) return 0;
+
+        List<Float> dailyGDDs = new ArrayList<>();
+
+        for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
+            LocalDateTime start = date.atStartOfDay();
+            LocalDateTime end = date.plusDays(1).atStartOfDay();
+
+            List<Float> dayTemps = new ArrayList<>();
+            for (Sensor sensor : tempSensors) {
+                List<SensorState> states = sensorStateRepository.findBySensorIdAndTimestampBetween(sensor.getId(), start, end);
+                for (SensorState s : states) {
+                    dayTemps.add(s.getValue());
+                }
+            }
+
+            if (!dayTemps.isEmpty()) {
+                double tMin = Collections.min(dayTemps);
+                double tMax = Collections.max(dayTemps);
+                double gdd = ((tMax + tMin) / 2) - baseTemperature;
+                dailyGDDs.add(Math.max(0, (float) gdd)); // GDD can't be negative
+            }
+        }
+
+        return dailyGDDs.stream().mapToDouble(Float::doubleValue).sum();
+    }
+
+    public double calculateDewPoint(int greenhouseId, LocalDate date) {
+        List<Sensor> tempSensors = sensorRepository.findByGreenhouseIdAndSensorType(greenhouseId, SensorType.TEMPERATURE);
+        List<Sensor> humiditySensors = sensorRepository.findByGreenhouseIdAndSensorType(greenhouseId, SensorType.HUMIDITY);
+
+        if (tempSensors.isEmpty() || humiditySensors.isEmpty()) return 0;
+
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = date.plusDays(1).atStartOfDay();
+
+        List<Float> tempValues = new ArrayList<>();
+        List<Float> humidityValues = new ArrayList<>();
+
+        for (Sensor sensor : tempSensors) {
+            List<SensorState> states = sensorStateRepository.findBySensorIdAndTimestampBetween(sensor.getId(), start, end);
+            for (SensorState s : states) tempValues.add(s.getValue());
+        }
+
+        for (Sensor sensor : humiditySensors) {
+            List<SensorState> states = sensorStateRepository.findBySensorIdAndTimestampBetween(sensor.getId(), start, end);
+            for (SensorState s : states) humidityValues.add(s.getValue());
+        }
+
+        if (tempValues.isEmpty() || humidityValues.isEmpty()) return 0;
+
+        double avgTemp = tempValues.stream().mapToDouble(Float::doubleValue).average().orElse(0);
+        double avgRH = humidityValues.stream().mapToDouble(Float::doubleValue).average().orElse(0);
+
+        // Approximate dew point formula
+        return avgTemp - ((100 - avgRH) / 5);
     }
 
     @Transactional

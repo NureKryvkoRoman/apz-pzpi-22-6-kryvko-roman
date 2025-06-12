@@ -1,12 +1,14 @@
 package ua.nure.kryvko.roman.apz.greenhouse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,6 +48,28 @@ public class GreenhouseController {
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/{id}/gdd")
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    public ResponseEntity<Double> getGDD(
+            @PathVariable("id") int greenhouseId,
+            @RequestParam double baseTemp,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+    ) {
+        double gdd = greenhouseService.calculateGDD(greenhouseId, baseTemp, from, to);
+        return ResponseEntity.ok(gdd);
+    }
+
+    @GetMapping("/{id}/dew-point")
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    public ResponseEntity<Double> getDewPoint(
+            @PathVariable("id") int greenhouseId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        double dewPoint = greenhouseService.calculateDewPoint(greenhouseId, date);
+        return ResponseEntity.ok(dewPoint);
     }
 
     @GetMapping("/user")
