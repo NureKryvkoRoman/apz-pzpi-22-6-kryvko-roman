@@ -1,0 +1,437 @@
+﻿Міністерство освіти і науки України
+Харківський національний університет радіоелектроніки
+Кафедра програмної інженерії
+
+
+
+
+ЗВІТ
+з лабораторної роботи №2
+з дисципліни «Архітектура програмного забезпечення»
+
+
+
+
+
+
+Виконав
+ст. гр. ПЗПІ-22-6
+Кривко Р. А.
+
+Перевірив
+ст. викладач кат. ПІ
+Сокорчук І.П.
+
+
+
+
+Харків 2025
+1 ІСТОРІЯ ЗМІН
+Таблиця 1.1 Історія змін
+№
+	Дата
+	Версія звіту
+	Опис змін та виправлень
+	1
+	31.05.2025
+	0.1
+	Створено основні розділи.
+	2
+	02.06.2025
+	0.2
+	Додано інформацію про проведену роботу.
+	3
+	02.06.2025
+	0.3
+	Додано посилання на відео на YouTube.
+	
+
+2 ЗАВДАННЯ
+* Потрібно розробити серверну / back-end частину програмної системи.
+* Проаналізуйте завдання (додаток В).
+* Виконайте контрольні завдання.
+* Відкрийте створений на попередній лабораторній роботі репозиторій GitHub.
+* Створіть у репозиторії директорію Lab2 та текстовий файл з описом інженерних рішень у цій частині проєкту.
+* Зафіксуйте кожну внесену зміну командою git commit з відповідним коментарем та фіксуйте цією командою усі наступні зміни у проєкті.
+* Створіть у директорії Lab2 піддиректорію для програмного коду.
+* Створіть програмний код, завантажте його у створену піддиректорію, зафіксуйте внесені у репозиторій зміни. Виконайте функціональне тестування створеного програмного коду та створіть відеозапис цього тестування тривалістю 7-10 хвилин з усними поясненнями процесу тестування.
+* Завантажте створений відеозапис тестування YouTube канал для вашого облікового запису в домені @nure.ua
+* Створіть для завантаженого запису його хронологічний опис.
+* Оформіть звіт у форматі pdf та завантажте його на навчальну платформу https://dl.nure.ua/
+* У коментарях до завантаженого звіту вкажіть посилання на відеозапис тестування у вашому каналі YouTube.
+
+
+3 ОПИС ВИКОНАНОЇ РОБОТИ
+Система має клієнт-серверну архітектуру, де серверна частина реалізована за допомогою фреймворку Spring Boot (Java) для обробки запитів та керування даними. Для зберігання інформації використовується реляційна база даних PostgreSQL, а для безпечної аутентифікації користувачів застосовується JWT (JSON Web Token). Система інтегрується з IoT-контролерами та сенсорами, що забезпечують моніторинг стану теплиці та автоматизацію процесів керування кліматом.
+Основні модулі серверної частини
+1. Авторизація та автентифікація
+* Реєстрація та вхід користувачів (адміністраторів та користувачів -  власників теплиць).
+* Використання JWT для безпечної аутентифікації та авторизації.
+* Керування ролями та правами доступу до об'єктів теплиці.
+2. Модуль управління теплицями
+* Додавання, редагування та видалення теплиць.
+* Моніторинг стану кожної теплиці через отримані дані з сенсорів.
+
+
+3. Модуль сенсорів та збору даних
+Інтеграція з IoT-сенсорами (), що збирають інформацію про:
+* Температуру
+* Вологість
+* Освітленість
+* Збереження поточних та історичних даних у базі даних.
+* Передача даних на сервер для подальшого аналізу та автоматичного керування.
+4. Модуль автоматизації:
+* Користувачі можуть додавати правила автоматизації для теплиць.
+* Кожне правило складається з деталей (AutomationRuleDetails) і визначає, які автоматизовані дії (AutomationAction) виконувати у відповідь на зміну параметрів середовища.
+* Виконання автоматичних дій через IoT-контролери (Controller), тобто надсилання команд контроллерам.
+5. Модуль сповіщень:
+* Автоматичні повідомлення користувачам про критичні події, такі як висока температура або недостатній рівень вологи.
+* Управління статусом повідомлень (прочитане/непрочитане).
+
+
+6. Модуль підписок:
+* Додавання, припинення, управління статусом підписок користувачів.
+7. Модуль профілю користувача:
+* Управління інформацією про користувача, включаючи контактні дані та роль у системі.
+Специфікація прикладного програмного інтерфейсу (API):
+POST        api/greenhouses                 Додавання нової теплиці
+GET         api/greenhouses/{id}            Отримання теплиці за ID
+PUT         api/greenhouses/{id}            Оновлення даних теплиці
+DELETE  api/greenhouses/{id}            Видалення теплиці
+
+
+GET         api/userinfo/{id}               Отримання інформації про користувача за ID
+GET         api/userinfo/user/{id}          Отримання інформації про користувача за ID користувача
+POST        api/userinfo                    Додавання інформації про користувача
+PATCH   api/userinfo/{id}               Оновлення інформації про користувача
+DELETE  api/userinfo/{id}               Видалення інформації про користувача
+
+
+POST        api/subscriptions               Додавання підписки
+GET         api/subscriptions/{id}          Отримання підписки за ID
+PUT         api/subscriptions/{id}          Оновлення підписки за ID
+DELETE  api/subscriptions/{id}          Видалення підписки за ID
+
+
+POST        automation-rules        Додавання нового правила автоматизації
+GET        automation-rules        Отримання всіх правил автоматизації
+GET        automation-rules/{id}        Отримання певного правила автоматизації
+PUT        automation-rules/{id}        Оновлення даних правила автоматизації
+DELETE        automation-rules/{id}        Видалення правила автоматизації
+POST        controllers        Додавання нового контролера
+GET        controllers        Отримання всіх контролерів
+GET        controllers/{id}        Отримання певного контролера
+DELETE        controllers/{id}        Видалення контролера
+GET        user        Отримання всіх користувачів
+GET        user/{id}        Отримання певного користувача
+POST        user        Додавання нового користувача
+PATCH        user/{id}        Оновлення даних користувача
+DELETE        user/{id}        Видалення користувача
+POST automation-rule-details Додавання нового правила автоматизації
+GET automation-rule-details Отримання всіх правил автоматизації
+GET automation-rule-details/{id} Отримання певного правила автоматизації
+PUT automation-rule-details/{id} Оновлення даних правила автоматизації
+DELETE automation-rule-details/{id} Видалення правила автоматизації
+
+POST auth/login Вхід у систему та  отримання JWT токена
+POST auth/signup Створення нового облікового запису користувача
+POST auth/refresh Оновлення JWT токена
+
+
+POST notifications Додавання нового повідомлення
+GET notifications/{id} Отримання певного повідомлення
+PUT notifications/{id} Оновлення даних повідомлення
+DELETE notifications/{id} Видалення повідомлення
+POST automation-actions Додавання правила автоматизації
+GET automation-actions/{id} Отримання певного правила автоматизації
+PUT automation-actions/{id} Оновлення даних правила автоматизації
+DELETE automation-actions/{id} Видалення правила автоматизації
+POST sensors Додавання нового сенсора
+GET sensors/{id} Отримання певного сенсора
+PUT sensors/{id} Оновлення даних сенсора
+DELETE sensors/{id} Видалення сенсора
+
+
+POST sensor-states Додавання нових даних сенсора
+GET sensor-states/{id} Отримання певних даних сенсора
+PUT sensor-states/{id} Оновлення інформації про дані сенсора
+DELETE sensor-states/{id} Видалення даних сенсора
+
+
+POST sensor-states Додавання нових даних сенсора
+GET sensor-states/{id} Отримання певних даних сенсора
+PUT sensor-states/{id} Оновлення інформації про дані сенсора
+DELETE sensor-states/{id} Видалення даних сенсора
+
+
+4 ВИСНОВКИ
+Під час виконання лабораторної роботи №2  було розроблено базу даних для серверної частини програмної системи та прикладний програмний інтерфейс.
+________________
+
+
+Додаток А
+Посилання на відео та хронологічний опис
+Відеозапис доповіді на YouTube: https://youtu.be/wmD62BF_0jM
+Хронологічний опис доповіді:
+- 00:00 - Вступ
+- 00:11 - Завдання на лабораторну роботу
+- 00:48 - Основні модулі серверної частини
+- 02:08 - Специфікація API
+- 02:30 - Схеми (ER-діаграма, Use Case, DSD)
+- 03:09 - Математична обробка прикладних даних
+- 03:30 - Адміністрування серверної частини
+- 03:50 - Резервне копіювання користувацьких даних
+- 04:05 - Огляд API
+- 04:55 -  Тестування серверної частини
+________________
+Додаток Б
+Графічні матеріали
+
+
+Рис. Б.1 - ER-діаграма бази даних системи
+
+Рис. Б.2 - Use-Case діаграма для реєстрації користувача
+
+
+
+Рис. Б.3 - Use-Case діаграма для адміністратора
+
+
+
+Рис. Б.4 - Use-Case діаграма для користувача (перегляд даних)
+
+
+
+Рис. Б.5 - Use-Case діаграма для користувача (управління теплицями)
+
+
+
+Рис. Б.6 - DSD-діаграма
+________________
+
+
+Додаток В
+Програмний код
+В.1 Математична обробка прикладних даних
+GitHub репозиторій: https://github.com/NureKryvkoRoman/apz-pzpi-22-6-kryvko-roman/blob/main/Lab2/pzpi-22-6-kryvko-roman-lab2/src/main/java/ua/nure/kryvko/roman/apz/greenhouse/GreenhouseService.java
+     1        public double calculateGDD(int greenhouseId, double baseTemperature, LocalDate from, LocalDate to) {
+     2            List<Sensor> tempSensors = sensorRepository.findByGreenhouseIdAndSensorType(greenhouseId, SensorType.TEMPERATURE);
+     3            if (tempSensors.isEmpty()) return 0;
+
+
+     4            List<Float> dailyGDDs = new ArrayList<>();
+
+
+     5            for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
+     6                LocalDateTime start = date.atStartOfDay();
+     7                LocalDateTime end = date.plusDays(1).atStartOfDay();
+
+
+     8                List<Float> dayTemps = new ArrayList<>();
+     9                for (Sensor sensor : tempSensors) {
+    10                    List<SensorState> states = sensorStateRepository.findBySensorIdAndTimestampBetween(sensor.getId(), start, end);
+    11                    for (SensorState s : states) {
+    12                        dayTemps.add(s.getValue());
+    13                    }
+    14                }
+
+
+    15                if (!dayTemps.isEmpty()) {
+    16                    double tMin = Collections.min(dayTemps);
+    17                    double tMax = Collections.max(dayTemps);
+    18                    double gdd = ((tMax + tMin) / 2) - baseTemperature;
+    19                    dailyGDDs.add(Math.max(0, (float) gdd)); // GDD can't be negative
+    20                }
+    21            }
+
+
+    22            return dailyGDDs.stream().mapToDouble(Float::doubleValue).sum();
+    23        }
+
+
+    24        public double calculateDewPoint(int greenhouseId, LocalDate date) {
+    25            List<Sensor> tempSensors = sensorRepository.findByGreenhouseIdAndSensorType(greenhouseId, SensorType.TEMPERATURE);
+    26            List<Sensor> humiditySensors = sensorRepository.findByGreenhouseIdAndSensorType(greenhouseId, SensorType.HUMIDITY);
+
+
+    27            if (tempSensors.isEmpty() || humiditySensors.isEmpty()) return 0;
+
+
+    28            LocalDateTime start = date.atStartOfDay();
+    29            LocalDateTime end = date.plusDays(1).atStartOfDay();
+
+
+    30            List<Float> tempValues = new ArrayList<>();
+    31            List<Float> humidityValues = new ArrayList<>();
+
+
+    32            for (Sensor sensor : tempSensors) {
+    33                List<SensorState> states = sensorStateRepository.findBySensorIdAndTimestampBetween(sensor.getId(), start, end);
+    34                for (SensorState s : states) tempValues.add(s.getValue());
+    35            }
+
+
+    36            for (Sensor sensor : humiditySensors) {
+    37                List<SensorState> states = sensorStateRepository.findBySensorIdAndTimestampBetween(sensor.getId(), start, end);
+    38                for (SensorState s : states) humidityValues.add(s.getValue());
+    39            }
+
+
+    40            if (tempValues.isEmpty() || humidityValues.isEmpty()) return 0;
+
+
+    41            double avgTemp = tempValues.stream().mapToDouble(Float::doubleValue).average().orElse(0);
+    42            double avgRH = humidityValues.stream().mapToDouble(Float::doubleValue).average().orElse(0);
+
+
+    43            // Approximate dew point formula
+    44            return avgTemp - ((100 - avgRH) / 5);
+    45        }
+В.2 Адміністрування бізнес-логіки системи
+GitHub репозиторій: https://github.com/NureKryvkoRoman/apz-pzpi-22-6-kryvko-roman/blob/main/Lab2/pzpi-22-6-kryvko-roman-lab2/src/main/java/ua/nure/kryvko/roman/apz/config/WebSecurityConfig.java
+     1    @EnableMethodSecurity
+     2    @Configuration
+     3    public class WebSecurityConfig {
+     4        @Autowired
+     5        CustomUserDetailsService userDetailsService;
+     6        @Autowired
+     7        private AuthEntryPointJwt unauthorizedHandler;
+     8        @Bean
+     9        public AuthTokenFilter authenticationJwtTokenFilter() {
+    10            return new AuthTokenFilter();
+    11        }
+    12        @Bean
+    13        public AuthenticationManager authenticationManager(
+    14                AuthenticationConfiguration authenticationConfiguration
+    15        ) throws Exception {
+    16            return authenticationConfiguration.getAuthenticationManager();
+    17        }
+    18        @Bean
+    19        public PasswordEncoder passwordEncoder() {
+    20            return new BCryptPasswordEncoder();
+    21        }
+    22        @Bean
+    23        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    24            http
+    25                    .csrf(AbstractHttpConfigurer::disable) // Disable CSRF
+    26                    .cors(AbstractHttpConfigurer::disable) // Disable CORS (can be configured if needed)
+    27                    .exceptionHandling(exceptionHandling ->
+    28                            exceptionHandling.authenticationEntryPoint(unauthorizedHandler)
+    29                    )
+    30                    .sessionManagement(sessionManagement ->
+    31                            sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+    32                    )
+    33                    .authorizeHttpRequests(authorizeRequests ->
+    34                            authorizeRequests
+    35                                    .requestMatchers(
+    36                                            "/v3/api-docs/**",
+    37                                            "/swagger-ui/**",
+    38                                            "/swagger-ui.html",
+    39                                            "/api/auth/**",
+    40                                            "/",
+    41                                            "/api/sensor-states" // allow access to sensor state endpoint for all IoT devices
+    42                                    ).permitAll()
+    43                                    .anyRequest().authenticated()
+    44                    );
+    45            // Add the JWT Token filter before the UsernamePasswordAuthenticationFilter
+    46            http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+    47            return http.build();
+    48        }
+    49    }
+    50    public class UserController {
+
+
+    51        private final UserService userService;
+
+
+    52        public UserController(UserService userService) {
+    53            this.userService = userService;
+    54        }
+
+
+    55        @GetMapping("")
+    56        List<User> findAll() {
+    57            return userService.getAllUsers();
+    58        }
+
+
+    59        @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    60        @GetMapping("/{id}")
+    61        ResponseEntity<User> findById(@PathVariable Integer id) {
+    62            Optional<User> user = userService.getUserById(id);
+    63            if(user.isEmpty()) {
+    64                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    65            }
+
+
+    66            return new ResponseEntity<>(user.get(), HttpStatus.OK);
+    67        }
+
+
+    68        @PostMapping("")
+    69        @PreAuthorize("hasRole('ADMIN')")
+    70        ResponseEntity<Void> create(@Valid @RequestBody User user) {
+    71            try {
+    72                userService.saveUser(user);
+    73            } catch (Exception e) {
+    74                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    75            }
+    76            return new ResponseEntity<>(HttpStatus.CREATED);
+    77        }
+
+
+    78        @PatchMapping("/{id}")
+    79        @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    80        ResponseEntity<Void> update(@Valid @RequestBody User user, @PathVariable Integer id) {
+    81            try {
+    82                userService.updateUser(user, id);
+    83            } catch (ResponseStatusException e) {
+    84                return ResponseEntity.status(e.getStatusCode()).build();
+    85            } catch (Exception e) {
+    86                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    87            }
+
+
+    88            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    89        }
+
+
+    90        @DeleteMapping("/{id}")
+    91        @ResponseStatus(HttpStatus.NO_CONTENT)
+    92        @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    93        ResponseEntity<Void> delete(@PathVariable Integer id) {
+    94            try {
+    95                userService.deleteUser(id);
+    96            } catch (ResponseStatusException e) {
+    97                return ResponseEntity.status(e.getStatusCode()).build();
+    98            } catch (Exception e) {
+    99                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+   100            }
+
+
+   101            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+   102        }
+
+
+   103    }
+
+
+В.3 Резервне копіювання користувацьких даних
+GitHub репозиторій: https://github.com/NureKryvkoRoman/apz-pzpi-22-6-kryvko-roman/blob/main/Lab2/pzpi-22-6-kryvko-roman-lab2/backup.sh
+     1    #!/bin/bash
+     2    DB_NAME="apz"
+     3    DB_USER="roman"
+     4    DB_HOST="localhost"
+     5    DB_PORT="5432"
+     6    BACKUP_DIR="backup"
+     7    DATE=$(date +%F_%H-%M-%S)
+     8    BACKUP_FILE="$BACKUP_DIR/${DB_NAME}_backup_$DATE.sql"
+     9    mkdir -p "$BACKUP_DIR"
+
+
+    10    pg_dump -U "$DB_USER" -h "$DB_HOST" -p "$DB_PORT" "$DB_NAME" > "$BACKUP_FILE"
+    11    if [ $? -eq 0 ]; then
+    12      echo "Backup successful: $BACKUP_FILE"
+    13    else
+    14      echo "Backup failed, error: $?"
+    15    fi
