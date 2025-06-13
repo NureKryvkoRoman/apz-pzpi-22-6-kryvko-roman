@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import NotificationsIcon from '@mui/icons-material/Notifications'
 import {
-  Container, TextField, Button, Typography, Paper, Box, CircularProgress
+  Container, TextField, Button, Typography, Paper, Box,
+  CircularProgress, Dialog, DialogTitle, DialogContent, IconButton
 } from '@mui/material';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
+import Notifications from './Notifications.jsx'
 
 const UserProfile = () => {
   const { user } = useAuth();
@@ -11,6 +14,7 @@ const UserProfile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -105,9 +109,14 @@ const UserProfile = () => {
   }
 
   return (
-    <Container maxWidth="sm">
-      <Paper sx={{ p: 4, mt: 6 }}>
-        <Typography variant="h4" gutterBottom>User Profile</Typography>
+    <Container maxWidth="md">
+      <Paper sx={{ p: 5, mt: 6 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h4" gutterBottom>User Profile</Typography>
+          <IconButton color="primary" onClick={() => setNotificationsOpen(true)}>
+            <NotificationsIcon />
+          </IconButton>
+        </Box>
 
         <Box component="form" noValidate autoComplete="off" sx={{ mt: 2 }}>
           <TextField
@@ -152,6 +161,18 @@ const UserProfile = () => {
           </Box>
         </Box>
       </Paper>
+
+      <Dialog
+        open={notificationsOpen}
+        onClose={() => setNotificationsOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Notifications</DialogTitle>
+        <DialogContent dividers>
+          <Notifications />
+        </DialogContent>
+      </Dialog>
     </Container>
   );
 };

@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -102,6 +103,21 @@ public class NotificationController {
             return ResponseEntity.ok(notifications);
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PatchMapping("mark-read/{id}")
+    @PreAuthorize("@authorizationService.canAccessNotification(#id, authentication)")
+    public ResponseEntity<Notification> markAsRead(@PathVariable Integer id) {
+        try {
+            Notification updatedNotification = notificationService.markAsRead(id);
+            return ResponseEntity.ok(updatedNotification);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

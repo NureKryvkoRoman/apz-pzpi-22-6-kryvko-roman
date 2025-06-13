@@ -65,6 +65,17 @@ public class NotificationService {
     }
 
     @Transactional
+    public Notification markAsRead(Integer id) {
+        Optional<Notification> optionalNotification = notificationRepository.findById(id);
+        if (optionalNotification.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found for update");
+        }
+        Notification notification = optionalNotification.get();
+        notification.setIsRead(true);
+        return notificationRepository.save(notification);
+    }
+
+    @Transactional
     public void deleteNotificationById(Integer id) {
         if (!notificationRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found for update");
