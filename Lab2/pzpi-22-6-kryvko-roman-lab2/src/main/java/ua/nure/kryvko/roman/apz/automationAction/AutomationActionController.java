@@ -33,7 +33,7 @@ public class AutomationActionController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessAutomationAction(#id, authentication)")
     public ResponseEntity<AutomationAction> getAutomationActionById(@PathVariable Integer id) {
         return automationActionService.getAutomationActionById(id)
                 .map(ResponseEntity::ok)
@@ -41,7 +41,7 @@ public class AutomationActionController {
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessAutomationAction(#id, authentication)")
     public ResponseEntity<AutomationAction> updateAutomationAction(@PathVariable Integer id,
                                                        @RequestBody AutomationAction automationAction) {
         try {
@@ -57,7 +57,7 @@ public class AutomationActionController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessAutomationAction(#id, authentication)")
     public ResponseEntity<Void> deleteAutomationAction(@PathVariable Integer id) {
         try {
             automationActionService.deleteAutomationAction(id);
@@ -72,7 +72,7 @@ public class AutomationActionController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AutomationAction>> getAllAutomationActions() {
         return ResponseEntity.ok(automationActionService.getAllAutomationActions());
     }

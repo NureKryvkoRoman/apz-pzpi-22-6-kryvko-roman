@@ -23,10 +23,9 @@ public class UserInfoController {
         this.userService = userService;
     }
 
-    //TODO: add methods to find userinfo by user email / login
     @GetMapping("/{id}")
     @ResponseBody
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessUserInfo(#id, authentication)")
     ResponseEntity<UserInfo> getById(@PathVariable Integer id) {
         try {
             return new ResponseEntity<>(userInfoService.getById(id), HttpStatus.OK);
@@ -49,7 +48,18 @@ public class UserInfoController {
         return new ResponseEntity<>(userInfoService.getByUser(userOptional.get()), HttpStatus.OK);
     }
 
-    @PostMapping("")
+    @GetMapping("/email")
+    @PreAuthorize("hasRole('ADMIN') or #email == authentication.name")
+    ResponseEntity<UserInfo> getByUserId(@RequestParam String email) {
+        Optional<User> userOptional = userService.getUserByEmail(email);
+        if(userOptional.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(userInfoService.getByUser(userOptional.get()), HttpStatus.OK);
+    }
+
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     ResponseEntity<Map<String, String>> create(@Valid @RequestBody UserInfo userInfo) {
         try {
@@ -65,7 +75,7 @@ public class UserInfoController {
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessUserInfo(#id, authentication)")
     ResponseEntity<Void> update(@Valid @RequestBody UserInfo userInfo, @PathVariable Integer id) {
         try {
             userInfoService.updateUserInfo(userInfo, id);
@@ -80,7 +90,7 @@ public class UserInfoController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessUserInfo(#id, authentication)")
     ResponseEntity<Void> delete(@PathVariable Integer id) {
         try {
             userInfoService.deleteUserInfo(id);

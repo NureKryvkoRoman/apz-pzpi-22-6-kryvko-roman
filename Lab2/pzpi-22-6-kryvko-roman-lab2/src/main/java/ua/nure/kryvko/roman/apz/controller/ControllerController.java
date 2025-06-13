@@ -35,6 +35,7 @@ public class ControllerController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("@authorizationService.canAccessController(#id, authentication)")
     public ResponseEntity<Controller> getControllerById(@PathVariable Integer id) {
         return controllerService.getControllerById(id)
                 .map(controller -> new ResponseEntity<>(controller, HttpStatus.OK))
@@ -42,13 +43,13 @@ public class ControllerController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Controller> getAllControllers() {
         return controllerService.getAllControllers();
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessController(#id, authentication)")
     public ResponseEntity<Controller> updateController(@PathVariable Integer id, @RequestBody Controller controller) {
         try {
             Controller newController = controllerService.updateController(id, controller);
@@ -63,7 +64,7 @@ public class ControllerController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessController(#id, authentication)")
     public ResponseEntity<Void> deleteController(@PathVariable Integer id) {
         try {
             controllerService.deleteController(id);

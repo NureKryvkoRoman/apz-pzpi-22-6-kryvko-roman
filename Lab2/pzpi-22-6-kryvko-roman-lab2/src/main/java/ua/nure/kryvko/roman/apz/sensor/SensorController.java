@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import ua.nure.kryvko.roman.apz.registration.CustomUserDetails;
 
 import java.util.Optional;
 
@@ -35,14 +37,14 @@ public class SensorController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessSensor(#id, authentication)")
     public ResponseEntity<Sensor> getSensorById(@PathVariable Integer id) {
         Optional<Sensor> sensor = sensorService.getSensorById(id);
         return sensor.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessSensor(#id, authentication)")
     public ResponseEntity<Sensor> updateSensor(@PathVariable Integer id, @RequestBody Sensor sensor) {
         try {
             sensor.setId(id);
@@ -58,7 +60,7 @@ public class SensorController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessSensor(#id, authentication)")
     public ResponseEntity<Void> deleteSensor(@PathVariable Integer id) {
         try {
             sensorService.deleteSensorById(id);

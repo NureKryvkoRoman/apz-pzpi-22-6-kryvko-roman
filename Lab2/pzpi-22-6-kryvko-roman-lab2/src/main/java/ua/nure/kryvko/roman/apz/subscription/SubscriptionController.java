@@ -35,14 +35,14 @@ public class SubscriptionController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessSubscription(#id, authentication)")
     public ResponseEntity<Subscription> getSubscriptionById(@PathVariable Integer id) {
         Optional<Subscription> subscription = subscriptionService.getSubscriptionById(id);
         return subscription.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessSubscription(#id, authentication)")
     public ResponseEntity<Subscription> updateSubscription(@PathVariable Integer id, @RequestBody Subscription subscription) {
         try {
             Subscription updatedSubscription = subscriptionService.updateSubscription(id, subscription);
@@ -57,7 +57,7 @@ public class SubscriptionController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessSubscription(#id, authentication)")
     public ResponseEntity<Void> deleteSubscription(@PathVariable Integer id) {
         try {
             subscriptionService.deleteSubscriptionById(id);

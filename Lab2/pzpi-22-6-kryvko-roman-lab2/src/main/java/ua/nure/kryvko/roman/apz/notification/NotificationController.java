@@ -36,7 +36,7 @@ public class NotificationController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessNotification(#id, authentication)")
     public ResponseEntity<Notification> getNotificationById(@PathVariable Integer id) {
         Optional<Notification> notification = notificationService.getNotificationById(id);
         return notification.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
@@ -69,7 +69,7 @@ public class NotificationController {
     }
 
     @GetMapping("/greenhouse/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessGreenhouse(#id, authentication)")
     public ResponseEntity<List<Notification>> getNotificationsByGreenhouseId(@PathVariable Integer id) {
         try {
             List<Notification> notifications = notificationService.getNotificationsByGreenhouse(id);
@@ -108,7 +108,7 @@ public class NotificationController {
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessNotification(#id, authentication)")
     public ResponseEntity<Notification> updateNotification(@PathVariable Integer id, @RequestBody Notification notification) {
         try {
             notification.setId(id);
@@ -124,7 +124,7 @@ public class NotificationController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessNotification(#id, authentication)")
     public ResponseEntity<Void> deleteNotification(@PathVariable Integer id) {
         try {
             notificationService.deleteNotificationById(id);

@@ -23,7 +23,7 @@ public class GreenhouseController {
         this.greenhouseService = greenhouseService;
     }
 
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<Greenhouse> createGreenhouse(@RequestBody Greenhouse greenhouse) {
         try {
             Greenhouse savedGreenhouse = greenhouseService.saveGreenhouse(greenhouse);
@@ -38,7 +38,7 @@ public class GreenhouseController {
     }
 
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessGreenhouse(#id, authentication)")
     public ResponseEntity<List<Greenhouse>> getGreenhousesByUserId(@PathVariable Integer userId) {
         try {
             List<Greenhouse> greenhouses = greenhouseService.getGreenhousesByUserId(userId);
@@ -51,7 +51,7 @@ public class GreenhouseController {
     }
 
     @GetMapping("/{id}/gdd")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessGreenhouse(#id, authentication)")
     public ResponseEntity<Double> getGDD(
             @PathVariable("id") int greenhouseId,
             @RequestParam double baseTemp,
@@ -63,7 +63,7 @@ public class GreenhouseController {
     }
 
     @GetMapping("/{id}/dew-point")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessGreenhouse(#id, authentication)")
     public ResponseEntity<Double> getDewPoint(
             @PathVariable("id") int greenhouseId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
@@ -86,14 +86,14 @@ public class GreenhouseController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessGreenhouse(#id, authentication)")
     public ResponseEntity<Greenhouse> getGreenhouseById(@PathVariable Integer id) {
         Optional<Greenhouse> greenhouse = greenhouseService.getGreenhouseById(id);
         return greenhouse.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessGreenhouse(#id, authentication)")
     public ResponseEntity<Greenhouse> updateGreenhouse(@PathVariable Integer id, @RequestBody Greenhouse greenhouse) {
         try {
             Greenhouse updatedGreenhouse = greenhouseService.updateGreenhouse(id, greenhouse);
@@ -108,7 +108,7 @@ public class GreenhouseController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessGreenhouse(#id, authentication)")
     public ResponseEntity<Void> deleteGreenhouse(@PathVariable Integer id) {
         try {
             greenhouseService.deleteGreenhouseById(id);

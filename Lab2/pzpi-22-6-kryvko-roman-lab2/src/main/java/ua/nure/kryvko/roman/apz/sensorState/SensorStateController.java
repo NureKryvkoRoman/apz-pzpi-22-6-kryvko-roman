@@ -34,7 +34,7 @@ public class SensorStateController {
     }
 
     @GetMapping("sensor/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessSensorState(#id, authentication)")
     public ResponseEntity<List<SensorState>> getSensorStatesBySensorId(@PathVariable Integer id) {
         try {
             return ResponseEntity.ok(sensorStateService.getSensorStateBySensorId(id));
@@ -48,7 +48,7 @@ public class SensorStateController {
     }
 
     @GetMapping("greenhouse/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessSensorState(#id, authentication)")
     public ResponseEntity<List<SensorState>> getSensorStatesByGreenhouseId(@PathVariable Integer id) {
         try {
             return ResponseEntity.ok(sensorStateService.getSensorStateByGreenhouseId(id));
@@ -62,14 +62,14 @@ public class SensorStateController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessSensorState(#id, authentication)")
     public ResponseEntity<SensorState> getSensorStateById(@PathVariable Integer id) {
         Optional<SensorState> sensorState = sensorStateService.getSensorStateById(id);
         return sensorState.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessSensorState(#id, authentication)")
     public ResponseEntity<SensorState> updateSensorState(@PathVariable Integer id, @RequestBody SensorState sensorState) {
         try {
             sensorState.setId(id);
@@ -85,7 +85,7 @@ public class SensorStateController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessSensorState(#id, authentication)")
     public ResponseEntity<Void> deleteSensorState(@PathVariable Integer id) {
         try {
             sensorStateService.deleteSensorStateById(id);

@@ -26,6 +26,10 @@ public class UserService {
         return userRepository.findById(id);
     }
 
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     public void saveUser(User user) {
         if (userRepository.existsByEmail(user.getEmail()) || userRepository.existsByLogin(user.getLogin())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT);

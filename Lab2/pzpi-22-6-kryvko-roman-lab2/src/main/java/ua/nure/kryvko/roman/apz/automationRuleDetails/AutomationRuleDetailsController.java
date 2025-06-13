@@ -37,20 +37,20 @@ public class AutomationRuleDetailsController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<AutomationRuleDetails> getAllAutomationRuleDetails() {
         return automationRuleDetailsService.getAllAutomationRuleDetails();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessAutomationRuleDetails(#id, authentication)")
     public ResponseEntity<AutomationRuleDetails> getAutomationRuleDetailsById(@PathVariable Integer id) {
         AutomationRuleDetails found = automationRuleDetailsService.getAutomationRuleDetailsById(id);
         return ResponseEntity.ok(found);
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessAutomationRuleDetails(#id, authentication)")
     public ResponseEntity<AutomationRuleDetails> updateAutomationRuleDetails(@PathVariable Integer id,
                                                                              @RequestBody AutomationRuleDetails automationRuleDetails) {
         try {
@@ -66,7 +66,7 @@ public class AutomationRuleDetailsController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("@authorizationService.canAccessAutomationRuleDetails(#id, authentication)")
     public ResponseEntity<Void> deleteAutomationRuleDetails(@PathVariable Integer id) {
         try {
             automationRuleDetailsService.deleteAutomationRuleDetails(id);
