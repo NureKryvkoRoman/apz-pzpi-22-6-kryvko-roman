@@ -73,7 +73,7 @@ public class GreenhouseController {
     }
 
     @GetMapping("/user")
-    @PreAuthorize("hasRole('ADMIN') or #email == authentication.name")
+    @PreAuthorize("hasRole('ADMIN') or #email == authentication.principal.getUsername()")
     public ResponseEntity<List<Greenhouse>> getGreenhousesByUserEmail(@RequestParam String email) {
         try {
             List<Greenhouse> greenhouses = greenhouseService.getGreenhousesByUserEmail(email);

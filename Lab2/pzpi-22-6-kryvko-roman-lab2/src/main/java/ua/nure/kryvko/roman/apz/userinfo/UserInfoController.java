@@ -49,7 +49,7 @@ public class UserInfoController {
     }
 
     @GetMapping("/email")
-    @PreAuthorize("hasRole('ADMIN') or #email == authentication.name")
+    @PreAuthorize("hasRole('ADMIN') or #email == authentication.principal.getUsername()")
     ResponseEntity<UserInfo> getByUserId(@RequestParam String email) {
         Optional<User> userOptional = userService.getUserByEmail(email);
         if(userOptional.isEmpty()) {

@@ -43,7 +43,7 @@ public class NotificationController {
     }
 
     @GetMapping("/user")
-    @PreAuthorize("hasRole('ADMIN') or #email == authentication.principal.name")
+    @PreAuthorize("hasRole('ADMIN') or #email == authentication.principal.getUsername()")
     public ResponseEntity<List<Notification>> getNotificationsByUserEmail(@RequestParam String email) {
         try {
             List<Notification> notifications = notificationService.getNotificationsByUserEmail(email);
