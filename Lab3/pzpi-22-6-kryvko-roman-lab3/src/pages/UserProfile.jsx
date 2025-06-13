@@ -3,11 +3,11 @@ import {
   Container, TextField, Button, Typography, Paper, Box, CircularProgress
 } from '@mui/material';
 import { toast } from 'react-toastify';
-import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
 const UserProfile = () => {
-  const { auth } = useAuth();
+  const { user } = useAuth();
+
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -18,22 +18,31 @@ const UserProfile = () => {
   });
 
   const fetchProfile = async () => {
+    if (!user?.accessToken || !user?.email) return;
+
     setLoading(true);
     try {
-      const res = await axios.get(`http://localhost:8080/api/userinfo/email?email=${auth.email}`);
-      setProfile(res.data);
-      setFormData({
-        firstName: res.data.firstName || '',
-        lastName: res.data.lastName || '',
-        phoneNumber: res.data.phoneNumber || ''
+      const res = await fetch(`http://localhost:8080/api/userinfo/email?email=${encodeURIComponent(user.email)}`, {
+        headers: {
+          Authorization: `Bearer ${user.accessToken}`
+        }
       });
-    } catch (err) {
-      if (err.response?.status === 404) {
+
+      if (res.ok) {
+        const data = await res.json();
+        setProfile(data);
+        setFormData({
+          firstName: data.firstName || '',
+          lastName: data.lastName || '',
+          phoneNumber: data.phoneNumber || ''
+        });
+      } else {
         toast.info("Profile not found. You can create one.");
         setProfile(null);
-      } else {
-        toast.error("Failed to load profile.");
       }
+    } catch (err) {
+      toast.error("Failed to load profile.");
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -44,33 +53,48 @@ const UserProfile = () => {
   };
 
   const handleSave = async () => {
+    const body = JSON.stringify({
+      ...formData,
+      user: { id: user.id }
+    });
+
     try {
+      let url, method;
       if (profile) {
-        // Update existing
-        await axios.post(`http://localhost:8080/api/userinfo/${profile.id}`, {
-          ...formData,
-          user: { id: auth.id }
-        });
-        toast.success("Profile updated successfully.");
+        url = `http://localhost:8080/api/userinfo/${profile.id}`;
+        method = 'PATCH'
       } else {
-        // Create new
-        const res = await axios.post(`http://localhost:8080/api/userinfo`, {
-          ...formData,
-          user: { id: auth.id }
-        });
-        toast.success("Profile created successfully.");
-        setProfile(res.data);
+        url = 'http://localhost:8080/api/userinfo';
+        method = 'POST'
       }
+
+      const res = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.accessToken}`
+        },
+        body
+      });
+
+      if (!res.ok) {
+        toast.error("Failed to save profile.");
+        console.log(res)
+      }
+
+      toast.success(profile ? "Profile updated successfully." : "Profile created successfully.");
       setEditing(false);
-      fetchProfile(); // Refresh after save
+      fetchProfile();
     } catch (err) {
-      toast.error("Failed to save profile.");
+      console.error(err);
     }
   };
 
   useEffect(() => {
     fetchProfile();
-  }, []);
+  }, [user]);
+
+  if (!user) return null;
 
   if (loading) {
     return (
