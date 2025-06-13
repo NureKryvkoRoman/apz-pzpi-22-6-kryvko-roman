@@ -27,15 +27,16 @@ const Login = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error('Error! ' + res.status);
+        const error = data?.error ?? "";
+        toast.error(`Error ${res.status}: ${error}`);
       } else {
         toast.success('Login successful!');
-        const { email, login, accessToken, refreshToken } = data;
+        const { id, email, login, accessToken, refreshToken } = data;
         localStorage.setItem(
           'user',
-          JSON.stringify({ email, username: login, refreshToken })
+          JSON.stringify({ id, email, username: login, refreshToken })
         );
-        setAuth({ email, username: login, accessToken });
+        setAuth({ id, email, username: login, accessToken });
         navigate('/');
       }
     } catch (err) {

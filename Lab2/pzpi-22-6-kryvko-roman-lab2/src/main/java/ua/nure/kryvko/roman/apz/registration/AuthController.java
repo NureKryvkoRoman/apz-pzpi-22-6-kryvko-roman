@@ -37,7 +37,7 @@ public class AuthController {
     JwtUtil jwtUtil;
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> authenticateUser(@RequestBody @Valid LoginRequest loginRequest) {
+    public ResponseEntity<AuthResponse> authenticateUser(@RequestBody @Valid LoginRequest loginRequest) {
         try {
             String email = loginRequest.getEmail();
             String login = loginRequest.getLogin();
@@ -47,28 +47,31 @@ public class AuthController {
                 if (Pattern.compile(EMAIL_PATTERN).matcher(email).matches()) {
                     optionalUser = userRepository.findByEmail(loginRequest.getEmail());
                 } else {
-                    return new ResponseEntity<>(Map.of("error", "Invalid email address."), HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>(new AuthResponse("Invalid email address."), HttpStatus.BAD_REQUEST);
                 }
             } else if (login != null) {
                 optionalUser = userRepository.findByLogin(loginRequest.getLogin());
             }
 
             if (optionalUser.isEmpty()) {
-                return new ResponseEntity<>(Map.of("error", "User not found"), HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>(new AuthResponse("User not found"), HttpStatus.UNAUTHORIZED);
             }
 
             User user = optionalUser.get();
             Map<String, String> tokens = generateTokens(loginRequest.getPassword(), user);
+            AuthResponse loginResponse = new AuthResponse(
+                    user.getId(),
+                    tokens.get("accessToken"),
+                    tokens.get("refreshToken"),
+                    user.getEmail(),
+                    user.getLogin()
+            );
 
-            return ResponseEntity.ok(tokens);
+            return ResponseEntity.ok(loginResponse);
         } catch (BadCredentialsException e) {
-            return new ResponseEntity<>(
-                    Map.of("error", "Invalid email, username, or password"),
-                    HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new AuthResponse("Invalid email, username, or password"), HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
-            return new ResponseEntity<>(
-                    Map.of("error", "An unexpected error occurred"),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new AuthResponse("An unexpected error occurred"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -92,12 +95,15 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Map<String, String>> registerUser(@RequestBody @Valid SignUpRequest signUpRequest) {
+    public ResponseEntity<AuthResponse> registerUser(@RequestBody @Valid SignUpRequest signUpRequest) {
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return new ResponseEntity<>(Map.of("error:","User with this email already exists."), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new AuthResponse("User with this email already exists."), HttpStatus.CONFLICT);
         } else if (userRepository.existsByLogin(signUpRequest.getLogin())) {
-            return new ResponseEntity<>(Map.of("error:", "Username is already taken."), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new AuthResponse("Username is already taken."), HttpStatus.CONFLICT);
         }
+
+        if (!Pattern.compile(EMAIL_PATTERN).matcher(signUpRequest.getEmail()).matches())
+            return new ResponseEntity<>(new AuthResponse("Invalid email address."), HttpStatus.BAD_REQUEST);
 
         User newUser = new User(
                 signUpRequest.getLogin(),
@@ -106,9 +112,15 @@ public class AuthController {
                 UserRole.USER
         );
 
-        userRepository.save(newUser);
-        Map<String, String> signUpResponse = generateTokens(signUpRequest.getPassword(), newUser);
-        signUpResponse.put("message","User registered successfully");
+        newUser = userRepository.save(newUser);
+        Map<String, String> tokens = generateTokens(signUpRequest.getPassword(), newUser);
+        AuthResponse signUpResponse = new AuthResponse(
+                newUser.getId(),
+                tokens.get("accessToken"),
+                tokens.get("refreshToken"),
+                newUser.getEmail(),
+                newUser.getLogin()
+        );
         return new ResponseEntity<>(signUpResponse, HttpStatus.CREATED);
     }
 
