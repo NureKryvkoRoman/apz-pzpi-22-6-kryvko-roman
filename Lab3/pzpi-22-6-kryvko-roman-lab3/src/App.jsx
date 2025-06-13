@@ -1,4 +1,4 @@
-import { AuthProvider, useAuth } from './context/AuthContext.jsx'
+import { AuthProvider } from './context/AuthContext.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 // import DashboardLayout from './pages/DashboardLayout.jsx'
@@ -11,6 +11,7 @@ import Register from './pages/Register.jsx'
 import NotFound from './pages/NotFound.jsx'
 import './App.css'
 import { BrowserRouter, Route, Routes } from 'react-router'
+import { ToastContainer } from 'react-toastify'
 
 function App() {
   return (
@@ -20,7 +21,7 @@ function App() {
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
 
-          {/* <Route path="/dashboard" element={<DashboardLayout />}> */}
+          {/* <Route path="/" element={<DashboardLayout />}> */}
           {/*   <Route path="greenhouses"> */}
           {/*     <Route index element={<GreenhouseList />} /> */}
           {/*     <Route path=":greenhouseId"> */}
@@ -37,6 +38,7 @@ function App() {
 
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <ToastContainer />
       </BrowserRouter>
     </AuthProvider >
   )
