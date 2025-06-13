@@ -3,27 +3,36 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [auth, setAuth] = useState({
-    id: null,
-    email: null,
-    username: null,
-    accessToken: null, // stored in memory
-  });
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Rehydrate from localStorage on first load
     const stored = JSON.parse(localStorage.getItem('user'));
-    if (stored?.refreshToken) {
-      setAuth(prev => ({
-        ...prev,
-        ...stored,
-        accessToken: null, // will be refreshed
-      }));
+    if (stored) {
+      setUser(stored);
     }
+    setIsLoading(false);
   }, []);
 
+  const login = (id, email, username, accessToken, refreshToken) => {
+    const user = {
+      id: id,
+      email: email,
+      username: username,
+      accessToken: accessToken,
+      refreshToken: refreshToken
+    };
+    localStorage.setItem('user', JSON.stringify(user));
+    setUser(user);
+  };
+
+  const logout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+  };
+
   return (
-    <AuthContext.Provider value={{ auth, setAuth }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -7,7 +7,7 @@ import Register from './pages/Register.jsx'
 // import GreenhouseStatistics from './pages/GreenhouseStatistics.jsx'
 // import GreenhouseSensors from './pages/GreenhouseSensors.jsx'
 // import Notifications from './pages/Notifications.jsx'
-// import UserProfile from './pages/UserProfile.jsx'
+import UserProfile from './pages/UserProfile.jsx'
 import NotFound from './pages/NotFound.jsx'
 import './App.css'
 import { BrowserRouter, Route, Routes } from 'react-router'
@@ -33,7 +33,7 @@ function App() {
           {/*   </Route> */}
           {/**/}
           {/*   <Route path="notifications" element={<Notifications />} /> */}
-          {/*   <Route path="profile" element={<UserProfile />} /> */}
+          <Route path="profile" element={<UserProfile />} />
           {/* </Route> */}
 
           <Route path="*" element={<NotFound />} />

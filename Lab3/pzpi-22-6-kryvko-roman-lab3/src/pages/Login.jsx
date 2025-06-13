@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', login: '', password: '' });
   const navigate = useNavigate();
-  const { setAuth } = useAuth();
+  const { login } = useAuth();
 
   const handleChange = e =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -31,12 +31,8 @@ const Login = () => {
         toast.error(`Error ${res.status}: ${error}`);
       } else {
         toast.success('Login successful!');
-        const { id, email, login, accessToken, refreshToken } = data;
-        localStorage.setItem(
-          'user',
-          JSON.stringify({ id, email, username: login, refreshToken })
-        );
-        setAuth({ id, email, username: login, accessToken });
+        const { id, email, username, accessToken, refreshToken } = data;
+        login(id, email, username, accessToken, refreshToken);
         navigate('/');
       }
     } catch (err) {
