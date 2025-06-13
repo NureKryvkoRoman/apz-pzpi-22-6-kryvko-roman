@@ -3,7 +3,7 @@ import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 // import DashboardLayout from './pages/DashboardLayout.jsx'
 // import GreenhouseOverview from './pages/GreenhouseOverview.jsx'
-// import GreenhouseList from './pages/GreenhouseList.jsx'
+import GreenhouseList from './pages/GreenhouseList.jsx'
 // import GreenhouseStatistics from './pages/GreenhouseStatistics.jsx'
 // import GreenhouseSensors from './pages/GreenhouseSensors.jsx'
 // import Notifications from './pages/Notifications.jsx'
@@ -22,15 +22,15 @@ function App() {
           <Route path="register" element={<Register />} />
 
           {/* <Route path="/" element={<DashboardLayout />}> */}
-          {/*   <Route path="greenhouses"> */}
-          {/*     <Route index element={<GreenhouseList />} /> */}
-          {/*     <Route path=":greenhouseId"> */}
-          {/*       <Route path="overview" element={<GreenhouseOverview />} /> */}
-          {/*       <Route path="sensors" element={<GreenhouseSensors />} /> */}
-          {/*       <Route path="automation" element={<GreenhouseAutomation />} /> */}
-          {/*       <Route path="statistics" element={<GreenhouseStatistics />} /> */}
-          {/*     </Route> */}
-          {/*   </Route> */}
+          <Route path="greenhouses">
+            <Route index element={<GreenhouseList />} />
+            {/*     <Route path=":greenhouseId"> */}
+            {/*       <Route path="overview" element={<GreenhouseOverview />} /> */}
+            {/*       <Route path="sensors" element={<GreenhouseSensors />} /> */}
+            {/*       <Route path="automation" element={<GreenhouseAutomation />} /> */}
+            {/*       <Route path="statistics" element={<GreenhouseStatistics />} /> */}
+            {/*     </Route> */}
+          </Route>
           {/**/}
           {/*   <Route path="notifications" element={<Notifications />} /> */}
           <Route path="profile" element={<UserProfile />} />
