@@ -23,7 +23,7 @@ public class Sensor {
     Integer id;
 
     @NotNull
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "greenhouse_id", referencedColumnName = "id")
     @JsonBackReference
     Greenhouse greenhouse;

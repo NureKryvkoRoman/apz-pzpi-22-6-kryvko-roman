@@ -8,6 +8,7 @@ import org.springframework.web.server.ResponseStatusException;
 import ua.nure.kryvko.roman.apz.greenhouse.Greenhouse;
 import ua.nure.kryvko.roman.apz.greenhouse.GreenhouseRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -44,9 +45,14 @@ public class SensorService {
 
     @Transactional
     public void deleteSensorById(Integer id) {
-        if (!sensorRepository.existsById(id)) {
+        Optional<Sensor> optionalSensor = sensorRepository.findById(id);
+        if (optionalSensor.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sensor ID not found for update.");
         }
-        sensorRepository.deleteById(id);
+        sensorRepository.delete(optionalSensor.get());
+    }
+
+    public List<Sensor> getSensorByGreenhouse(Integer greenhouseId) {
+        return sensorRepository.findByGreenhouseId(greenhouseId);
     }
 }

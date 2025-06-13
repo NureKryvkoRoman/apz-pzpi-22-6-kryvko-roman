@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface SensorRepository extends JpaRepository<Sensor, Integer> {
     List<Sensor> findByGreenhouseIdAndSensorType(Integer greenhouseId, SensorType sensorType);
+
+    List<Sensor> findByGreenhouseId(Integer greenhouseId);
 }

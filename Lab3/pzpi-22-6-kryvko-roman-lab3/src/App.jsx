@@ -29,10 +29,7 @@ function App() {
             {/*       <Route path="automation" element={<GreenhouseAutomation />} /> */}
             {/*       <Route path="statistics" element={<GreenhouseStatistics />} /> */}
           </Route>
-          {/**/}
-          {/*   <Route path="notifications" element={<Notifications />} /> */}
           <Route path="profile" element={<UserProfile />} />
-          {/* </Route> */}
 
           <Route path="*" element={<NotFound />} />
         </Routes>

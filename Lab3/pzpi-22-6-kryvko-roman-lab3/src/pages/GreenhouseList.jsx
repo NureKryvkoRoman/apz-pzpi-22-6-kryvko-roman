@@ -10,11 +10,13 @@ import {
 } from '@mui/material';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router';
 
 const GreenhouseList = () => {
   const { user } = useAuth();
   const [greenhouses, setGreenhouses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const fetchGreenhouses = async () => {
     setLoading(true);
@@ -62,7 +64,11 @@ const GreenhouseList = () => {
         <Grid container spacing={3} mt={2}>
           {greenhouses.map((gh) => (
             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={gh.id}>
-              <Card sx={{ height: '100%' }}>
+              <Card
+                sx={{ height: '100%' }}
+                onClick={() => navigate(`/greenhouses/${gh.id}`)}
+                style={{ cursor: 'pointer' }}
+              >
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
                     {gh.name || `Greenhouse #${gh.id}`}

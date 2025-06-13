@@ -9,7 +9,12 @@ import {
   Button,
   Box,
   Paper,
-  IconButton
+  IconButton,
+  Dialog,
+  DialogActions,
+  MenuItem,
+  DialogContent,
+  DialogTitle
 } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { useParams } from 'react-router';
@@ -22,6 +27,11 @@ const GreenhouseOverview = () => {
   const [sensors, setSensors] = useState([]);
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({ name: '', latitude: 0, longitude: 0 });
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [newSensor, setNewSensor] = useState({
+    name: '',
+    sensorType: 'TEMPERATURE'
+  });
 
   const { user } = useAuth();
 
@@ -56,6 +66,10 @@ const GreenhouseOverview = () => {
 
   const handleFieldChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSensorChange = (e) => {
+    setNewSensor({ ...newSensor, [e.target.name]: e.target.value });
   };
 
   const handleSave = async () => {
@@ -97,19 +111,62 @@ const GreenhouseOverview = () => {
     }
   };
 
-  const handleAddSensor = () => {
-    const newSensor = {
-      id: Date.now(),
-      greenhouse: { id: greenhouse.id },
-      isActive: true,
-      sensorType: 'TEMPERATURE',
-      name: 'New Sensor'
-    };
-    setSensors(prev => [...prev, newSensor]);
+  const fetchSensors = async () => {
+    try {
+      const res = await fetch(`http://localhost:8080/api/sensors/greenhouse/${greenhouseId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.accessToken}`,
+          }
+        })
+      if (res.ok) {
+        setSensors(await res.json());
+      } else {
+        console.log(res);
+        toast.error("Failed to fetch sensors");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch sensors");
+    }
+  }
+
+  const handleAddSensor = async () => {
+    try {
+      const data = {
+        ...newSensor,
+        greenhouse: { id: greenhouse.id },
+        isActive: true
+      };
+      console.log(data)
+      await fetch('http://localhost:8080/api/sensors', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${user.accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+      setAddDialogOpen(false);
+      setNewSensor({ name: '', sensorType: 'TEMPERATURE' });
+      fetchSensors();
+    } catch (err) {
+      console.error("Failed to add sensor", err);
+    }
   };
 
-  const handleDeleteSensor = (sensorId) => {
-    setSensors(prev => prev.filter(sensor => sensor.id !== sensorId));
+  const handleDeleteSensor = async (sensorId) => {
+    try {
+      await fetch(`http://localhost:8080/api/sensors/${sensorId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${user.accessToken}`,
+        }
+      });
+      fetchSensors();
+    } catch (err) {
+      console.error("Failed to delete sensor", err);
+    }
   };
 
   if (!greenhouse) return null;
@@ -158,7 +215,14 @@ const GreenhouseOverview = () => {
       <Box mt={5}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h5" gutterBottom>Sensors</Typography>
-          <Button variant="outlined" onClick={handleAddSensor}>Add Sensor</Button>
+          <Button
+            variant="outlined"
+            sx={{ mt: 4 }}
+            onClick={() => setAddDialogOpen(true)}
+          >
+            Add Sensor
+          </Button>
+
         </Box>
         <Grid container spacing={2}>
           {sensors.map(sensor => (
@@ -181,6 +245,37 @@ const GreenhouseOverview = () => {
           ))}
         </Grid>
       </Box>
+      <Dialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)}>
+        <DialogTitle>Add New Sensor</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Sensor Name"
+            name="name"
+            value={newSensor.name}
+            onChange={handleSensorChange}
+            fullWidth
+          />
+          <TextField
+            select
+            label="Sensor Type"
+            name="sensorType"
+            value={newSensor.sensorType}
+            onChange={handleSensorChange}
+            fullWidth
+            margin="dense"
+          >
+            <MenuItem value="TEMPERATURE">Temperature</MenuItem>
+            <MenuItem value="HUMIDITY">Humidity</MenuItem>
+            <MenuItem value="LIGHT">Light</MenuItem>
+          </TextField>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAddDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleAddSensor} variant="contained">Add</Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ua.nure.kryvko.roman.apz.registration.CustomUserDetails;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -41,6 +42,13 @@ public class SensorController {
     public ResponseEntity<Sensor> getSensorById(@PathVariable Integer id) {
         Optional<Sensor> sensor = sensorService.getSensorById(id);
         return sensor.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("greenhouse/{greenhouseId}")
+    @PreAuthorize("@authorizationService.canAccessGreenhouse(#greenhouseId, authentication)")
+    public ResponseEntity<List<Sensor>> getSensorsByGreenhouse(@PathVariable Integer greenhouseId) {
+        List<Sensor> sensors = sensorService.getSensorByGreenhouse(greenhouseId);
+        return ResponseEntity.ok(sensors);
     }
 
     @PatchMapping("/{id}")
