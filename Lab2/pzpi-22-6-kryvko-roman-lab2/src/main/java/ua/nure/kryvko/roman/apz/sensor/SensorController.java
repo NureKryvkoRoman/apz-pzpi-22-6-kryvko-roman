@@ -4,13 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import ua.nure.kryvko.roman.apz.registration.CustomUserDetails;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static ua.nure.kryvko.roman.apz.sensor.SensorResponseMapper.toDto;
 
 @RestController
 @RequestMapping("/api/sensors")
@@ -24,10 +25,10 @@ public class SensorController {
     }
 
     @PostMapping
-    public ResponseEntity<Sensor> createSensor(@RequestBody Sensor sensor) {
+    public ResponseEntity<SensorResponse> createSensor(@RequestBody Sensor sensor) {
         try {
             Sensor savedSensor = sensorService.saveSensor(sensor);
-            return ResponseEntity.ok(savedSensor);
+            return ResponseEntity.ok(toDto(savedSensor));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (IllegalArgumentException e) {
@@ -39,25 +40,28 @@ public class SensorController {
 
     @GetMapping("/{id}")
     @PreAuthorize("@authorizationService.canAccessSensor(#id, authentication)")
-    public ResponseEntity<Sensor> getSensorById(@PathVariable Integer id) {
+    public ResponseEntity<SensorResponse> getSensorById(@PathVariable Integer id) {
         Optional<Sensor> sensor = sensorService.getSensorById(id);
-        return sensor.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        if (sensor.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(toDto(sensor.get()));
     }
 
     @GetMapping("greenhouse/{greenhouseId}")
     @PreAuthorize("@authorizationService.canAccessGreenhouse(#greenhouseId, authentication)")
-    public ResponseEntity<List<Sensor>> getSensorsByGreenhouse(@PathVariable Integer greenhouseId) {
+    public ResponseEntity<List<SensorResponse>> getSensorsByGreenhouse(@PathVariable Integer greenhouseId) {
         List<Sensor> sensors = sensorService.getSensorByGreenhouse(greenhouseId);
-        return ResponseEntity.ok(sensors);
+        return ResponseEntity.ok(sensors.stream().map(SensorResponseMapper::toDto).collect(Collectors.toList()));
     }
 
     @PatchMapping("/{id}")
     @PreAuthorize("@authorizationService.canAccessSensor(#id, authentication)")
-    public ResponseEntity<Sensor> updateSensor(@PathVariable Integer id, @RequestBody Sensor sensor) {
+    public ResponseEntity<SensorResponse> updateSensor(@PathVariable Integer id, @RequestBody Sensor sensor) {
         try {
             sensor.setId(id);
             Sensor updatedSensor = sensorService.updateSensor(sensor);
-            return ResponseEntity.ok(updatedSensor);
+            return ResponseEntity.ok(toDto(updatedSensor));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (IllegalArgumentException e) {

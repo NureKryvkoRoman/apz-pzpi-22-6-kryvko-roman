@@ -120,4 +120,28 @@ public class Greenhouse {
     public void setSensors(List<Sensor> sensors) {
         this.sensors = sensors;
     }
+
+    public List<Controller> getControllers() {
+        return controllers;
+    }
+
+    public void setControllers(List<Controller> controllers) {
+        this.controllers = controllers;
+    }
+
+    public List<Notification> getNotifications() {
+        return notifications;
+    }
+
+    public void setNotifications(List<Notification> notifications) {
+        this.notifications = notifications;
+    }
+
+    public List<AutomationRule> getAutomationRules() {
+        return automationRules;
+    }
+
+    public void setAutomationRules(List<AutomationRule> automationRules) {
+        this.automationRules = automationRules;
+    }
 }

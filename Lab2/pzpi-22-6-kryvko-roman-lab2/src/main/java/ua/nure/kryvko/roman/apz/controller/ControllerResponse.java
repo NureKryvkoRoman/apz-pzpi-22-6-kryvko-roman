@@ -1,50 +1,30 @@
 package ua.nure.kryvko.roman.apz.controller;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 import ua.nure.kryvko.roman.apz.automationRule.AutomationRule;
-import ua.nure.kryvko.roman.apz.greenhouse.Greenhouse;
 
-import java.time.Duration;
 import java.util.Date;
 
-@Entity
-@DynamicUpdate
-@DynamicInsert
-@Table(name = "controller")
-public class Controller {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class ControllerResponse {
     Integer id;
-
-    @NotNull
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "greenhouse_id", referencedColumnName = "id")
-    Greenhouse greenhouse;
-
-    @NotNull
+    Integer greenhouseId;
     boolean isActive;
-
     Date installedAt;
-
     String name;
-
-    @Enumerated(EnumType.STRING)
     ControllerType controllerType;
-
-    @OneToOne(mappedBy = "controller")
     AutomationRule automationRule;
 
-    public Controller() {}
+    public ControllerResponse() {}
 
-    public Controller(Greenhouse greenhouse, boolean isActive, Date installedAt, String name, ControllerType controllerType) {
-        this.greenhouse = greenhouse;
+    public ControllerResponse(Integer id, Integer greenhouseId, boolean isActive,
+                              Date installedAt, String name, ControllerType controllerType,
+                              AutomationRule automationRule) {
+        this.id = id;
+        this.greenhouseId = greenhouseId;
         this.isActive = isActive;
         this.installedAt = installedAt;
         this.name = name;
         this.controllerType = controllerType;
+        this.automationRule = automationRule;
     }
 
     public Integer getId() {
@@ -55,12 +35,12 @@ public class Controller {
         this.id = id;
     }
 
-    public Greenhouse getGreenhouse() {
-        return greenhouse;
+    public Integer getGreenhouseId() {
+        return greenhouseId;
     }
 
-    public void setGreenhouse(Greenhouse greenhouse) {
-        this.greenhouse = greenhouse;
+    public void setGreenhouseId(Integer greenhouseId) {
+        this.greenhouseId = greenhouseId;
     }
 
     public boolean isActive() {
@@ -93,14 +73,6 @@ public class Controller {
 
     public void setControllerType(ControllerType controllerType) {
         this.controllerType = controllerType;
-    }
-
-    public void run(Duration interval) {
-        //TODO: implement
-    }
-
-    public void run() {
-        //TODO: implement
     }
 
     public AutomationRule getAutomationRule() {

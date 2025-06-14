@@ -1,6 +1,7 @@
 package ua.nure.kryvko.roman.apz.userinfo;
 
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,9 +16,21 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/userinfo")
 public class UserInfoController {
+    private static UserInfoResponse toDto(UserInfo userInfo) {
+        return new UserInfoResponse(
+                userInfo.getId(),
+                userInfo.getUser().getId(),
+                userInfo.getCreatedAt(),
+                userInfo.getLastLogin(),
+                userInfo.getFirstName(),
+                userInfo.getLastName(),
+                userInfo.getPhoneNumber()
+        );
+    }
     private final UserInfoService userInfoService;
     private final UserService userService;
 
+    @Autowired
     public UserInfoController(UserInfoService userInfoService, UserService userService) {
         this.userInfoService = userInfoService;
         this.userService = userService;
@@ -26,9 +39,9 @@ public class UserInfoController {
     @GetMapping("/{id}")
     @ResponseBody
     @PreAuthorize("@authorizationService.canAccessUserInfo(#id, authentication)")
-    ResponseEntity<UserInfo> getById(@PathVariable Integer id) {
+    ResponseEntity<UserInfoResponse> getById(@PathVariable Integer id) {
         try {
-            return new ResponseEntity<>(userInfoService.getById(id), HttpStatus.OK);
+            return new ResponseEntity<>(toDto(userInfoService.getById(id)), HttpStatus.OK);
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
@@ -39,24 +52,24 @@ public class UserInfoController {
     @GetMapping("/user/{id}")
     @ResponseBody
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
-    ResponseEntity<UserInfo> getByUserId(@PathVariable Integer id) {
+    ResponseEntity<UserInfoResponse> getByUserId(@PathVariable Integer id) {
         Optional<User> userOptional = userService.getUserById(id);
         if(userOptional.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(userInfoService.getByUser(userOptional.get()), HttpStatus.OK);
+        return new ResponseEntity<>(toDto(userInfoService.getByUser(userOptional.get())), HttpStatus.OK);
     }
 
     @GetMapping("/email")
     @PreAuthorize("hasRole('ADMIN') or #email == authentication.principal.getUsername()")
-    ResponseEntity<UserInfo> getByUserId(@RequestParam String email) {
+    ResponseEntity<UserInfoResponse> getByUserEmail(@RequestParam String email) {
         Optional<User> userOptional = userService.getUserByEmail(email);
         if(userOptional.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(userInfoService.getByUser(userOptional.get()), HttpStatus.OK);
+        return new ResponseEntity<>(toDto(userInfoService.getByUser(userOptional.get())), HttpStatus.OK);
     }
 
     @PostMapping

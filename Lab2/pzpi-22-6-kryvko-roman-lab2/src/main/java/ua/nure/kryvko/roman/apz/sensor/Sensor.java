@@ -91,4 +91,28 @@ public class Sensor {
     public String getName() {
         return name;
     }
+
+    public List<SensorState> getSensorStates() {
+        return sensorStates;
+    }
+
+    public void setSensorStates(List<SensorState> sensorStates) {
+        this.sensorStates = sensorStates;
+    }
+
+    public LocalDateTime getInstalledAt() {
+        return installedAt;
+    }
+
+    public void setInstalledAt(LocalDateTime installedAt) {
+        this.installedAt = installedAt;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
 }

@@ -12,6 +12,15 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/subscriptions")
 public class SubscriptionController {
+    private static SubscriptionResponse toDto(Subscription subscription) {
+        return new SubscriptionResponse(
+                subscription.getId(),
+                subscription.getUser().getId(),
+                subscription.getStartDate(),
+                subscription.getEndDate(),
+                subscription.getStatus()
+        );
+    }
 
     private final SubscriptionService subscriptionService;
 
@@ -21,10 +30,10 @@ public class SubscriptionController {
     }
 
     @PostMapping
-    public ResponseEntity<Subscription> createSubscription(@RequestBody Subscription subscription) {
+    public ResponseEntity<SubscriptionResponse> createSubscription(@RequestBody Subscription subscription) {
         try {
             Subscription savedSubscription = subscriptionService.saveSubscription(subscription);
-            return new ResponseEntity<>(savedSubscription, HttpStatus.CREATED);
+            return new ResponseEntity<>(toDto(savedSubscription), HttpStatus.CREATED);
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (IllegalArgumentException e) {
@@ -36,17 +45,20 @@ public class SubscriptionController {
 
     @GetMapping("/{id}")
     @PreAuthorize("@authorizationService.canAccessSubscription(#id, authentication)")
-    public ResponseEntity<Subscription> getSubscriptionById(@PathVariable Integer id) {
+    public ResponseEntity<SubscriptionResponse> getSubscriptionById(@PathVariable Integer id) {
         Optional<Subscription> subscription = subscriptionService.getSubscriptionById(id);
-        return subscription.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        if (subscription.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(toDto(subscription.get()));
     }
 
     @PatchMapping("/{id}")
     @PreAuthorize("@authorizationService.canAccessSubscription(#id, authentication)")
-    public ResponseEntity<Subscription> updateSubscription(@PathVariable Integer id, @RequestBody Subscription subscription) {
+    public ResponseEntity<SubscriptionResponse> updateSubscription(@PathVariable Integer id, @RequestBody Subscription subscription) {
         try {
             Subscription updatedSubscription = subscriptionService.updateSubscription(id, subscription);
-            return ResponseEntity.ok(updatedSubscription);
+            return ResponseEntity.ok(toDto(updatedSubscription));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (IllegalArgumentException e) {

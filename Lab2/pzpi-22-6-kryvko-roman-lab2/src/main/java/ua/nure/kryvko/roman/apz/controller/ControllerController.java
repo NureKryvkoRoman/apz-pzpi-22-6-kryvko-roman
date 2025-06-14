@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static ua.nure.kryvko.roman.apz.controller.ControllerResponseMapper.toDto;
 
 @RestController
 @RequestMapping("/api/controllers")
@@ -21,10 +24,10 @@ public class ControllerController {
     }
 
     @PostMapping
-    public ResponseEntity<Controller> createController(@RequestBody Controller controller) {
+    public ResponseEntity<ControllerResponse> createController(@RequestBody Controller controller) {
         try {
             Controller savedController = controllerService.createController(controller);
-            return new ResponseEntity<>(savedController, HttpStatus.CREATED);
+            return new ResponseEntity<>(toDto(savedController), HttpStatus.CREATED);
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (IllegalArgumentException e) {
@@ -36,24 +39,25 @@ public class ControllerController {
 
     @GetMapping("/{id}")
     @PreAuthorize("@authorizationService.canAccessController(#id, authentication)")
-    public ResponseEntity<Controller> getControllerById(@PathVariable Integer id) {
+    public ResponseEntity<ControllerResponse> getControllerById(@PathVariable Integer id) {
         return controllerService.getControllerById(id)
-                .map(controller -> new ResponseEntity<>(controller, HttpStatus.OK))
+                .map(controller -> new ResponseEntity<>(toDto(controller), HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public List<Controller> getAllControllers() {
-        return controllerService.getAllControllers();
+    public List<ControllerResponse> getAllControllers() {
+        return controllerService.getAllControllers().stream().map(ControllerResponseMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @PatchMapping("/{id}")
     @PreAuthorize("@authorizationService.canAccessController(#id, authentication)")
-    public ResponseEntity<Controller> updateController(@PathVariable Integer id, @RequestBody Controller controller) {
+    public ResponseEntity<ControllerResponse> updateController(@PathVariable Integer id, @RequestBody Controller controller) {
         try {
             Controller newController = controllerService.updateController(id, controller);
-            return ResponseEntity.ok(newController);
+            return ResponseEntity.ok(toDto(newController));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (IllegalArgumentException e) {

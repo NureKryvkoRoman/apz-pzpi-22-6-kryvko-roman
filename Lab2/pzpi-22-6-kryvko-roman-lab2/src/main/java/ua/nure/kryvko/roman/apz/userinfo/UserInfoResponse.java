@@ -1,48 +1,22 @@
 package ua.nure.kryvko.roman.apz.userinfo;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-import org.springframework.data.annotation.CreatedDate;
-import ua.nure.kryvko.roman.apz.user.User;
-
 import java.time.LocalDateTime;
 
-@Entity
-@DynamicUpdate
-@DynamicInsert
-@Table(name = "user_info")
-public class UserInfo {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class UserInfoResponse {
     Integer id;
-
-    @NotNull
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    User user;
-
-    @CreatedDate
+    Integer userId;
     LocalDateTime createdAt;
-
     LocalDateTime lastLogin;
-
     String firstName;
-
     String lastName;
-
     String phoneNumber;
 
-    public UserInfo() { }
+    public UserInfoResponse() {}
 
-    public UserInfo(User user,
-                    LocalDateTime createdAt,
-                    LocalDateTime lastLogin,
-                    String firstName,
-                    String lastName,
-                    String phoneNumber) {
-        this.user = user;
+    public UserInfoResponse(Integer id, Integer userId, LocalDateTime createdAt,
+                            LocalDateTime lastLogin, String firstName, String lastName, String phoneNumber) {
+        this.id = id;
+        this.userId = userId;
         this.createdAt = createdAt;
         this.lastLogin = lastLogin;
         this.firstName = firstName;
@@ -58,12 +32,12 @@ public class UserInfo {
         this.id = id;
     }
 
-    public User getUser() {
-        return user;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public LocalDateTime getCreatedAt() {

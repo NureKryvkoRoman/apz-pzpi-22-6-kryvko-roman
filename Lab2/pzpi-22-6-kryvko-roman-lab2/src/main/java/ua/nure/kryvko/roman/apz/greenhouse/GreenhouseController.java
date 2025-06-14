@@ -7,14 +7,33 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import ua.nure.kryvko.roman.apz.automationRule.AutomationRuleResponseMapper;
+import ua.nure.kryvko.roman.apz.controller.ControllerResponseMapper;
+import ua.nure.kryvko.roman.apz.notification.NotificationResponseMapper;
+import ua.nure.kryvko.roman.apz.sensor.SensorResponseMapper;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/greenhouses")
 public class GreenhouseController {
+    private static GreenhouseResponse toDto(Greenhouse greenhouse) {
+        return new GreenhouseResponse(
+                greenhouse.getId(),
+                greenhouse.getUser().getId(),
+                greenhouse.getCreatedAt(),
+                greenhouse.getName(),
+                greenhouse.getLatitude(),
+                greenhouse.getLongitude(),
+                greenhouse.getSensors().stream().map(SensorResponseMapper::toDto).toList(),
+                greenhouse.getControllers().stream().map(ControllerResponseMapper::toDto).collect(Collectors.toList()),
+                greenhouse.getNotifications().stream().map(NotificationResponseMapper::toDto).collect(Collectors.toList()),
+                greenhouse.getAutomationRules().stream().map(AutomationRuleResponseMapper::toDto).collect(Collectors.toList())
+        );
+    }
 
     private final GreenhouseService greenhouseService;
 
@@ -24,10 +43,10 @@ public class GreenhouseController {
     }
 
     @PostMapping
-    public ResponseEntity<Greenhouse> createGreenhouse(@RequestBody Greenhouse greenhouse) {
+    public ResponseEntity<GreenhouseResponse> createGreenhouse(@RequestBody Greenhouse greenhouse) {
         try {
             Greenhouse savedGreenhouse = greenhouseService.saveGreenhouse(greenhouse);
-            return new ResponseEntity<>(savedGreenhouse, HttpStatus.CREATED);
+            return new ResponseEntity<>(toDto(savedGreenhouse), HttpStatus.CREATED);
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (IllegalArgumentException e) {
@@ -39,10 +58,10 @@ public class GreenhouseController {
 
     @GetMapping("/user/{userId}")
     @PreAuthorize("@authorizationService.canAccessGreenhouse(#id, authentication)")
-    public ResponseEntity<List<Greenhouse>> getGreenhousesByUserId(@PathVariable Integer userId) {
+    public ResponseEntity<List<GreenhouseResponse>> getGreenhousesByUserId(@PathVariable Integer userId) {
         try {
             List<Greenhouse> greenhouses = greenhouseService.getGreenhousesByUserId(userId);
-            return ResponseEntity.ok(greenhouses);
+            return ResponseEntity.ok(greenhouses.stream().map(GreenhouseController::toDto).collect(Collectors.toList()));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
@@ -74,10 +93,10 @@ public class GreenhouseController {
 
     @GetMapping("/user")
     @PreAuthorize("hasRole('ADMIN') or #email == authentication.principal.getUsername()")
-    public ResponseEntity<List<Greenhouse>> getGreenhousesByUserEmail(@RequestParam String email) {
+    public ResponseEntity<List<GreenhouseResponse>> getGreenhousesByUserEmail(@RequestParam String email) {
         try {
             List<Greenhouse> greenhouses = greenhouseService.getGreenhousesByUserEmail(email);
-            return ResponseEntity.ok(greenhouses);
+            return ResponseEntity.ok(greenhouses.stream().map(GreenhouseController::toDto).collect(Collectors.toList()));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
@@ -87,17 +106,20 @@ public class GreenhouseController {
 
     @GetMapping("/{id}")
     @PreAuthorize("@authorizationService.canAccessGreenhouse(#id, authentication)")
-    public ResponseEntity<Greenhouse> getGreenhouseById(@PathVariable Integer id) {
+    public ResponseEntity<GreenhouseResponse> getGreenhouseById(@PathVariable Integer id) {
         Optional<Greenhouse> greenhouse = greenhouseService.getGreenhouseById(id);
-        return greenhouse.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        if (greenhouse.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(toDto(greenhouse.get()));
     }
 
     @PatchMapping("/{id}")
     @PreAuthorize("@authorizationService.canAccessGreenhouse(#id, authentication)")
-    public ResponseEntity<Greenhouse> updateGreenhouse(@PathVariable Integer id, @RequestBody Greenhouse greenhouse) {
+    public ResponseEntity<GreenhouseResponse> updateGreenhouse(@PathVariable Integer id, @RequestBody Greenhouse greenhouse) {
         try {
             Greenhouse updatedGreenhouse = greenhouseService.updateGreenhouse(id, greenhouse);
-            return ResponseEntity.ok(updatedGreenhouse);
+            return ResponseEntity.ok(toDto(updatedGreenhouse));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (IllegalArgumentException e) {

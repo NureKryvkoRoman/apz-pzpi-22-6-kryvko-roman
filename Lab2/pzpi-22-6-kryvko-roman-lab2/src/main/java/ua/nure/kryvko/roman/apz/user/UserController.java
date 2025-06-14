@@ -9,10 +9,19 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
+    private static UserResponse toDto(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getLogin(),
+                user.getEmail(),
+                user.getRole()
+        );
+    }
 
     private final UserService userService;
 
@@ -21,20 +30,19 @@ public class UserController {
     }
 
     @GetMapping("")
-    List<User> findAll() {
-        return userService.getAllUsers();
+    List<UserResponse> findAll() {
+        return userService.getAllUsers().stream().map(UserController::toDto).collect(Collectors.toList());
     }
 
-    //TODO: add methods to find users by email / login
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     @GetMapping("/{id}")
-    ResponseEntity<User> findById(@PathVariable Integer id) {
+    ResponseEntity<UserResponse> findById(@PathVariable Integer id) {
         Optional<User> user = userService.getUserById(id);
         if(user.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(user.get(), HttpStatus.OK);
+        return new ResponseEntity<>(toDto(user.get()), HttpStatus.OK);
     }
 
     @PostMapping("")

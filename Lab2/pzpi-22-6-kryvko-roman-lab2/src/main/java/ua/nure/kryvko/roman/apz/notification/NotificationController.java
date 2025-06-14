@@ -7,9 +7,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static ua.nure.kryvko.roman.apz.notification.NotificationResponseMapper.toDto;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -23,10 +25,10 @@ public class NotificationController {
     }
 
     @PostMapping
-    public ResponseEntity<Notification> createNotification(@RequestBody Notification notification) {
+    public ResponseEntity<NotificationResponse> createNotification(@RequestBody Notification notification) {
         try {
             Notification savedNotification = notificationService.createNotification(notification);
-            return ResponseEntity.ok(savedNotification);
+            return ResponseEntity.ok(toDto(savedNotification));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (IllegalArgumentException e) {
@@ -38,17 +40,21 @@ public class NotificationController {
 
     @GetMapping("/{id}")
     @PreAuthorize("@authorizationService.canAccessNotification(#id, authentication)")
-    public ResponseEntity<Notification> getNotificationById(@PathVariable Integer id) {
+    public ResponseEntity<NotificationResponse> getNotificationById(@PathVariable Integer id) {
         Optional<Notification> notification = notificationService.getNotificationById(id);
-        return notification.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        if (notification.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(toDto(notification.get()));
     }
 
     @GetMapping("/user")
     @PreAuthorize("hasRole('ADMIN') or #email == authentication.principal.getUsername()")
-    public ResponseEntity<List<Notification>> getNotificationsByUserEmail(@RequestParam String email) {
+    public ResponseEntity<List<NotificationResponse>> getNotificationsByUserEmail(@RequestParam String email) {
         try {
             List<Notification> notifications = notificationService.getNotificationsByUserEmail(email);
-            return ResponseEntity.ok(notifications);
+            return ResponseEntity.ok(notifications.stream().map(NotificationResponseMapper::toDto)
+                    .collect(Collectors.toList()));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
@@ -58,10 +64,11 @@ public class NotificationController {
 
     @GetMapping("/user/{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
-    public ResponseEntity<List<Notification>> getNotificationsByUserId(@PathVariable Integer id) {
+    public ResponseEntity<List<NotificationResponse>> getNotificationsByUserId(@PathVariable Integer id) {
         try {
             List<Notification> notifications = notificationService.getNotificationByUserId(id);
-            return ResponseEntity.ok(notifications);
+            return ResponseEntity.ok(notifications.stream().map(NotificationResponseMapper::toDto)
+                    .collect(Collectors.toList()));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
@@ -71,10 +78,11 @@ public class NotificationController {
 
     @GetMapping("/greenhouse/{id}")
     @PreAuthorize("@authorizationService.canAccessGreenhouse(#id, authentication)")
-    public ResponseEntity<List<Notification>> getNotificationsByGreenhouseId(@PathVariable Integer id) {
+    public ResponseEntity<List<NotificationResponse>> getNotificationsByGreenhouseId(@PathVariable Integer id) {
         try {
             List<Notification> notifications = notificationService.getNotificationsByGreenhouse(id);
-            return ResponseEntity.ok(notifications);
+            return ResponseEntity.ok(notifications.stream().map(NotificationResponseMapper::toDto)
+                    .collect(Collectors.toList()));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
@@ -84,10 +92,11 @@ public class NotificationController {
 
     @GetMapping("/user/unread/{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
-    public ResponseEntity<List<Notification>> getUnreadNotificationsByUser(@PathVariable Integer id) {
+    public ResponseEntity<List<NotificationResponse>> getUnreadNotificationsByUser(@PathVariable Integer id) {
         try {
             List<Notification> notifications = notificationService.getUnreadNotificationsByUser(id);
-            return ResponseEntity.ok(notifications);
+            return ResponseEntity.ok(notifications.stream().map(NotificationResponseMapper::toDto)
+                    .collect(Collectors.toList()));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
@@ -97,10 +106,11 @@ public class NotificationController {
 
     @GetMapping("/user/urgency/{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
-    public ResponseEntity<List<Notification>> getUnreadNotificationsByUser(@PathVariable Integer id, @RequestParam NotificationUrgency urgency) {
+    public ResponseEntity<List<NotificationResponse>> getUnreadNotificationsByUser(@PathVariable Integer id, @RequestParam NotificationUrgency urgency) {
         try {
             List<Notification> notifications = notificationService.getUnreadNotificationsByUserUrgency(id, urgency);
-            return ResponseEntity.ok(notifications);
+            return ResponseEntity.ok(notifications.stream().map(NotificationResponseMapper::toDto)
+                    .collect(Collectors.toList()));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (Exception e) {
@@ -110,10 +120,10 @@ public class NotificationController {
 
     @PatchMapping("mark-read/{id}")
     @PreAuthorize("@authorizationService.canAccessNotification(#id, authentication)")
-    public ResponseEntity<Notification> markAsRead(@PathVariable Integer id) {
+    public ResponseEntity<NotificationResponse> markAsRead(@PathVariable Integer id) {
         try {
             Notification updatedNotification = notificationService.markAsRead(id);
-            return ResponseEntity.ok(updatedNotification);
+            return ResponseEntity.ok(toDto(updatedNotification));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (IllegalArgumentException e) {
@@ -125,11 +135,11 @@ public class NotificationController {
 
     @PatchMapping("/{id}")
     @PreAuthorize("@authorizationService.canAccessNotification(#id, authentication)")
-    public ResponseEntity<Notification> updateNotification(@PathVariable Integer id, @RequestBody Notification notification) {
+    public ResponseEntity<NotificationResponse> updateNotification(@PathVariable Integer id, @RequestBody Notification notification) {
         try {
             notification.setId(id);
             Notification updatedNotification = notificationService.updateNotification(notification);
-            return ResponseEntity.ok(updatedNotification);
+            return ResponseEntity.ok(toDto(updatedNotification));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (IllegalArgumentException e) {

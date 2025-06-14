@@ -9,10 +9,20 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/sensor-states")
 public class SensorStateController {
+    private static SensorStateResponse toDto(SensorState sensorState) {
+        return new SensorStateResponse(
+                sensorState.getId(),
+                sensorState.getSensor().getId(),
+                sensorState.getTimestamp(),
+                sensorState.getValue(),
+                sensorState.getUnit()
+        );
+    }
 
     private final SensorStateService sensorStateService;
 
@@ -22,10 +32,10 @@ public class SensorStateController {
     }
 
     @PostMapping
-    public ResponseEntity<SensorState> createSensorState(@RequestBody SensorState sensorState) {
+    public ResponseEntity<SensorStateResponse> createSensorState(@RequestBody SensorState sensorState) {
         try {
             SensorState savedSensorState = sensorStateService.saveSensorState(sensorState);
-            return new ResponseEntity<>(savedSensorState, HttpStatus.CREATED);
+            return new ResponseEntity<>(toDto(savedSensorState), HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
@@ -35,9 +45,11 @@ public class SensorStateController {
 
     @GetMapping("sensor/{id}")
     @PreAuthorize("@authorizationService.canAccessSensorState(#id, authentication)")
-    public ResponseEntity<List<SensorState>> getSensorStatesBySensorId(@PathVariable Integer id) {
+    public ResponseEntity<List<SensorStateResponse>> getSensorStatesBySensorId(@PathVariable Integer id) {
         try {
-            return ResponseEntity.ok(sensorStateService.getSensorStateBySensorId(id));
+            return ResponseEntity.ok(sensorStateService.getSensorStateBySensorId(id).stream()
+                    .map(SensorStateController::toDto)
+                    .collect(Collectors.toList()));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (IllegalArgumentException e) {
@@ -49,9 +61,11 @@ public class SensorStateController {
 
     @GetMapping("greenhouse/{id}")
     @PreAuthorize("@authorizationService.canAccessSensorState(#id, authentication)")
-    public ResponseEntity<List<SensorState>> getSensorStatesByGreenhouseId(@PathVariable Integer id) {
+    public ResponseEntity<List<SensorStateResponse>> getSensorStatesByGreenhouseId(@PathVariable Integer id) {
         try {
-            return ResponseEntity.ok(sensorStateService.getSensorStateByGreenhouseId(id));
+            return ResponseEntity.ok(sensorStateService.getSensorStateByGreenhouseId(id).stream()
+                    .map(SensorStateController::toDto)
+                    .collect(Collectors.toList()));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (IllegalArgumentException e) {
@@ -63,18 +77,21 @@ public class SensorStateController {
 
     @GetMapping("/{id}")
     @PreAuthorize("@authorizationService.canAccessSensorState(#id, authentication)")
-    public ResponseEntity<SensorState> getSensorStateById(@PathVariable Integer id) {
+    public ResponseEntity<SensorStateResponse> getSensorStateById(@PathVariable Integer id) {
         Optional<SensorState> sensorState = sensorStateService.getSensorStateById(id);
-        return sensorState.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        if (sensorState.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(toDto(sensorState.get()));
     }
 
     @PatchMapping("/{id}")
     @PreAuthorize("@authorizationService.canAccessSensorState(#id, authentication)")
-    public ResponseEntity<SensorState> updateSensorState(@PathVariable Integer id, @RequestBody SensorState sensorState) {
+    public ResponseEntity<SensorStateResponse> updateSensorState(@PathVariable Integer id, @RequestBody SensorState sensorState) {
         try {
             sensorState.setId(id);
             SensorState updatedSensorState = sensorStateService.updateSensorState(sensorState);
-            return ResponseEntity.ok(updatedSensorState);
+            return ResponseEntity.ok(toDto(updatedSensorState));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (IllegalArgumentException e) {
