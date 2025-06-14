@@ -8,8 +8,7 @@ public class ControllerResponseMapper {
                 controller.isActive(),
                 controller.getInstalledAt(),
                 controller.getName(),
-                controller.getControllerType(),
-                ua.nure.kryvko.roman.apz.automationRule.AutomationRuleResponseMapper.toDto(controller.getAutomationRule())
+                controller.getControllerType()
         );
     }
 }

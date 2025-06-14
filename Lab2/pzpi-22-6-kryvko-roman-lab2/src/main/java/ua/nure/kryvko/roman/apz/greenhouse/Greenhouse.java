@@ -26,7 +26,7 @@ public class Greenhouse {
     Integer id;
 
     @NotNull
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     User user;
 

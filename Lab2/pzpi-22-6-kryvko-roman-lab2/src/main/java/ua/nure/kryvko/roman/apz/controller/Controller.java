@@ -2,6 +2,7 @@ package ua.nure.kryvko.roman.apz.controller;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import ua.nure.kryvko.roman.apz.automationRule.AutomationRule;
@@ -20,7 +21,7 @@ public class Controller {
     Integer id;
 
     @NotNull
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "greenhouse_id", referencedColumnName = "id")
     Greenhouse greenhouse;
 
@@ -34,7 +35,8 @@ public class Controller {
     @Enumerated(EnumType.STRING)
     ControllerType controllerType;
 
-    @OneToOne(mappedBy = "controller")
+    @Null
+    @OneToOne(mappedBy = "controller", cascade = CascadeType.ALL)
     AutomationRule automationRule;
 
     public Controller() {}

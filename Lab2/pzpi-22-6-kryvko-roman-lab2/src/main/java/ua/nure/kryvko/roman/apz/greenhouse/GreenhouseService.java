@@ -15,10 +15,7 @@ import ua.nure.kryvko.roman.apz.user.UserRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class GreenhouseService {
@@ -106,6 +103,9 @@ public class GreenhouseService {
 
         // Ensure the user is a managed entity
         greenhouse.setUser(owner);
+        if (greenhouse.getCreatedAt() == null) {
+            greenhouse.setCreatedAt(LocalDateTime.now());
+        }
         return greenhouseRepository.save(greenhouse);
     }
 

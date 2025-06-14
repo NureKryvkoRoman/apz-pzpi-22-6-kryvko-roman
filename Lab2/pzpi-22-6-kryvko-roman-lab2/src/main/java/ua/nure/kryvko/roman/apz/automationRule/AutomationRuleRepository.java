@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface AutomationRuleRepository extends JpaRepository<AutomationRule, Integer> {
     List<AutomationRule> findByGreenhouse(Greenhouse greenhouse);
+    List<AutomationRule> findByGreenhouseId(Integer greenhouseId);
 }

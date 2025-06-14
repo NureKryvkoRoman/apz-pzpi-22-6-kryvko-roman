@@ -1,7 +1,5 @@
 package ua.nure.kryvko.roman.apz.controller;
 
-import ua.nure.kryvko.roman.apz.automationRule.AutomationRuleResponse;
-
 import java.util.Date;
 
 public class ControllerResponse {
@@ -11,20 +9,17 @@ public class ControllerResponse {
     Date installedAt;
     String name;
     ControllerType controllerType;
-    AutomationRuleResponse automationRule;
 
     public ControllerResponse() {}
 
     public ControllerResponse(Integer id, Integer greenhouseId, boolean isActive,
-                              Date installedAt, String name, ControllerType controllerType,
-                              AutomationRuleResponse automationRule) {
+                              Date installedAt, String name, ControllerType controllerType) {
         this.id = id;
         this.greenhouseId = greenhouseId;
         this.isActive = isActive;
         this.installedAt = installedAt;
         this.name = name;
         this.controllerType = controllerType;
-        this.automationRule = automationRule;
     }
 
     public Integer getId() {
@@ -73,13 +68,5 @@ public class ControllerResponse {
 
     public void setControllerType(ControllerType controllerType) {
         this.controllerType = controllerType;
-    }
-
-    public AutomationRuleResponse getAutomationRule() {
-        return automationRule;
-    }
-
-    public void setAutomationRule(AutomationRuleResponse automationRule) {
-        this.automationRule = automationRule;
     }
 }

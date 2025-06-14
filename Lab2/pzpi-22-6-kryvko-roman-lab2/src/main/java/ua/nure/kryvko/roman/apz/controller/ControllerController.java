@@ -45,6 +45,13 @@ public class ControllerController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @GetMapping("/greenhouse/{id}")
+    @PreAuthorize("@authorizationService.canAccessGreenhouse(#id, authentication)")
+    public ResponseEntity<List<ControllerResponse>> getControllersByGreenhouseId(@PathVariable Integer id) {
+        List<Controller> controllers = controllerService.getControllerByGreenhouseId(id);
+        return ResponseEntity.ok(controllers.stream().map(ControllerResponseMapper::toDto).collect(Collectors.toList()));
+    }
+
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public List<ControllerResponse> getAllControllers() {

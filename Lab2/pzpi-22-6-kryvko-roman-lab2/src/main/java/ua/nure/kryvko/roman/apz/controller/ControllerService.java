@@ -39,6 +39,10 @@ public class ControllerService {
         return controllerRepository.findById(id);
     }
 
+    public List<Controller> getControllerByGreenhouseId(Integer id) {
+        return controllerRepository.findByGreenhouseId(id);
+    }
+
     public List<Controller> getAllControllers() {
         return controllerRepository.findAll();
     }

@@ -13,14 +13,14 @@ public interface GreenhouseRepository extends JpaRepository<Greenhouse, Integer>
 
     @Query("SELECT new ua.nure.kryvko.roman.apz.greenhouse.GreenhouseSummary(g.id, g.user.id, g.createdAt, g.name, g.latitude, g.longitude, COUNT(s.id)) " +
             "FROM Greenhouse g " +
-            "JOIN g.sensors s " +
+            "LEFT JOIN g.sensors s " +
             "WHERE g.user.id = :id " +
             "GROUP BY g.id, g.user.id, g.createdAt, g.name, g.latitude, g.longitude")
-    List<GreenhouseSummary> findSummaryByUserId(Integer id);
+    List<GreenhouseSummary> findSummaryByUserId(@Param("id") Integer id);
 
     @Query("SELECT new ua.nure.kryvko.roman.apz.greenhouse.GreenhouseSummary(g.id, g.user.id, g.createdAt, g.name, g.latitude, g.longitude, COUNT(s.id)) " +
             "FROM Greenhouse g " +
-            "JOIN g.sensors s " +
+            "LEFT JOIN g.sensors s " +
             "WHERE g.id = :id " +
             "GROUP BY g.id, g.user.id, g.createdAt, g.name, g.latitude, g.longitude")
     Optional<GreenhouseSummary> findSummaryById(@Param("id") Integer id);

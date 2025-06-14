@@ -6,17 +6,89 @@ import {
   Typography,
   Container,
   CircularProgress,
-  Box
+  Box,
+  Button,
+  Dialog,
+  TextField,
+  DialogTitle,
+  DialogActions,
+  DialogContent,
+  IconButton
 } from '@mui/material';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router';
+import { Delete } from '@mui/icons-material';
 
 const GreenhouseList = () => {
   const { user } = useAuth();
   const [greenhouses, setGreenhouses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [newGreenhouse, setNewGreenhouse] = useState({
+    name: '',
+    latitude: '',
+    longitude: ''
+  });
+
   const navigate = useNavigate();
+
+  const handleCreateFieldChange = (e) => {
+    setNewGreenhouse(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch(`http://localhost:8080/api/greenhouses/${id}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${user.accessToken}`,
+          }
+        });
+      console.log(res)
+      if (!res.ok) {
+        toast.error("Failed to delete greenhouse");
+      } else {
+        toast.success("Successfully deleted greenhouse");
+        setGreenhouses(greenhouses.filter(gh => gh.id != id)); // remove deleted greenhouse from view
+      }
+    } catch (err) {
+      toast.error("Failed to delete greenhouse");
+      console.error(err);
+    }
+  };
+
+  const handleCreateGreenhouse = async () => {
+    try {
+      const data = {
+        ...newGreenhouse,
+        latitude: parseFloat(newGreenhouse.latitude),
+        longitude: parseFloat(newGreenhouse.longitude),
+        user: { id: parseInt(user.id) }
+      };
+
+      console.log(data);
+      const res = await fetch('http://localhost:8080/api/greenhouses', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${user.accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+      console.log(res);
+
+      if (!res.ok) throw new Error('Failed to create greenhouse');
+      toast.success('Greenhouse created');
+      setCreateDialogOpen(false);
+      setNewGreenhouse({ name: '', latitude: '', longitude: '' });
+      fetchGreenhouses();
+    } catch (err) {
+      console.error(err);
+      toast.error('Error creating greenhouse');
+    }
+  };
 
   const fetchGreenhouses = async () => {
     setLoading(true);
@@ -54,6 +126,12 @@ const GreenhouseList = () => {
         My Greenhouses
       </Typography>
 
+      <Box display="flex" justifyContent="flex-end" mb={2}>
+        <Button variant="contained" onClick={() => setCreateDialogOpen(true)}>
+          + Add Greenhouse
+        </Button>
+      </Box>
+
       {loading ? (
         <Box display="flex" justifyContent="center" mt={4}>
           <CircularProgress />
@@ -87,12 +165,61 @@ const GreenhouseList = () => {
                       Sensors: {gh.sensorCount}
                     </Typography>
                   </Box>
+                  <IconButton
+                    color="error"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(gh.id);
+                    }}
+                    sx={{ mt: 1 }}
+                  >
+                    <Delete />
+                  </IconButton>
                 </CardContent>
               </Card>
             </Grid>
           ))}
         </Grid>
       )}
+
+      <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)}>
+        <DialogTitle>Create New Greenhouse</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Greenhouse Name"
+            name="name"
+            value={newGreenhouse.name}
+            onChange={handleCreateFieldChange}
+            fullWidth
+          />
+          <TextField
+            margin="dense"
+            label="Latitude"
+            name="latitude"
+            type="number"
+            value={newGreenhouse.latitude}
+            onChange={handleCreateFieldChange}
+            fullWidth
+          />
+          <TextField
+            margin="dense"
+            label="Longitude"
+            name="longitude"
+            type="number"
+            value={newGreenhouse.longitude}
+            onChange={handleCreateFieldChange}
+            fullWidth
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleCreateGreenhouse} variant="contained">
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import ua.nure.kryvko.roman.apz.controller.Controller;
+import ua.nure.kryvko.roman.apz.controller.ControllerRepository;
 import ua.nure.kryvko.roman.apz.greenhouse.Greenhouse;
 import ua.nure.kryvko.roman.apz.greenhouse.GreenhouseRepository;
 import ua.nure.kryvko.roman.apz.sensorState.SensorState;
@@ -17,19 +19,26 @@ public class AutomationRuleService {
 
     private final AutomationRuleRepository automationRuleRepository;
     private final GreenhouseRepository greenhouseRepository;
+    private final ControllerRepository controllerRepository;
 
     @Autowired
     public AutomationRuleService(AutomationRuleRepository automationRuleRepository,
-                                 GreenhouseRepository greenhouseRepository) {
+                                 GreenhouseRepository greenhouseRepository,
+                                 ControllerRepository controllerRepository) {
         this.automationRuleRepository = automationRuleRepository;
         this.greenhouseRepository = greenhouseRepository;
+        this.controllerRepository = controllerRepository;
     }
 
     @Transactional
     public AutomationRule createAutomationRule(AutomationRule automationRule) {
         Greenhouse owner = greenhouseRepository.findById(automationRule.getGreenhouse().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Greenhouse does not exist."));
+        Controller controller = controllerRepository.findById(automationRule.getController().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Controller does not exist."));
+
         automationRule.setGreenhouse(owner);
+        automationRule.setController(controller);
         return automationRuleRepository.save(automationRule);
     }
 
@@ -37,6 +46,9 @@ public class AutomationRuleService {
         return automationRuleRepository.findAll();
     }
 
+    public List<AutomationRule> getAutomationRulesByGreenhouseId(Integer greenhouseId) {
+       return automationRuleRepository.findByGreenhouseId(greenhouseId);
+    }
     public Optional<AutomationRule> getAutomationRuleById(Integer id) {
         return automationRuleRepository.findById(id);
     }

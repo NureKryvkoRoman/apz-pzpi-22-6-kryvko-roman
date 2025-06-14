@@ -48,6 +48,15 @@ public class AutomationRuleController {
                 .collect(Collectors.toList()));
     }
 
+    @GetMapping("/greenhouse/{id}")
+    @PreAuthorize("@authorizationService.canAccessGreenhouse(#id, authentication)")
+    public ResponseEntity<List<AutomationRuleResponse>> getAutomationRuleByGreenhouseId(@PathVariable Integer id) {
+        List<AutomationRule> automationRules = automationRuleService.getAutomationRulesByGreenhouseId(id);
+        return ResponseEntity.ok(automationRules.stream()
+                .map(AutomationRuleResponseMapper::toDto)
+                .collect(Collectors.toList()));
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("@authorizationService.canAccessAutomationRule(#id, authentication)")
     public ResponseEntity<AutomationRuleResponse> getAutomationRuleById(@PathVariable Integer id) {
