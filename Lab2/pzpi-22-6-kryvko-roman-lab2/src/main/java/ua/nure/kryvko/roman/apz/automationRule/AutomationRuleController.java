@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static ua.nure.kryvko.roman.apz.automationRule.AutomationRuleResponseMapper.toDto;
 
 @RestController
 @RequestMapping("/api/automation-rules")
@@ -23,10 +27,10 @@ public class AutomationRuleController {
     }
 
     @PostMapping
-    public ResponseEntity<AutomationRule> createAutomationRule(@RequestBody AutomationRule automationRule) {
+    public ResponseEntity<AutomationRuleResponse> createAutomationRule(@RequestBody AutomationRule automationRule) {
         try {
             AutomationRule createdRule = automationRuleService.createAutomationRule(automationRule);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdRule);
+            return ResponseEntity.status(HttpStatus.CREATED).body(toDto(createdRule));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (IllegalArgumentException e) {
@@ -38,24 +42,28 @@ public class AutomationRuleController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<AutomationRule>> getAllAutomationRules() {
-        return ResponseEntity.ok(automationRuleService.getAllAutomationRules());
+    public ResponseEntity<List<AutomationRuleResponse>> getAllAutomationRules() {
+        return ResponseEntity.ok(automationRuleService.getAllAutomationRules().stream()
+                .map(AutomationRuleResponseMapper::toDto)
+                .collect(Collectors.toList()));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("@authorizationService.canAccessAutomationRule(#id, authentication)")
-    public ResponseEntity<AutomationRule> getAutomationRuleById(@PathVariable Integer id) {
-        return automationRuleService.getAutomationRuleById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
+    public ResponseEntity<AutomationRuleResponse> getAutomationRuleById(@PathVariable Integer id) {
+        Optional<AutomationRule> automationRule = automationRuleService.getAutomationRuleById(id);
+        if (automationRule.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(toDto(automationRule.get()));
     }
 
     @PatchMapping("/{id}")
     @PreAuthorize("@authorizationService.canAccessAutomationRule(#id, authentication)")
-    public ResponseEntity<AutomationRule> updateAutomationRule(@PathVariable Integer id, @RequestBody AutomationRule automationRule) {
+    public ResponseEntity<AutomationRuleResponse> updateAutomationRule(@PathVariable Integer id, @RequestBody AutomationRule automationRule) {
         try {
             AutomationRule updatedRule = automationRuleService.updateAutomationRule(id, automationRule);
-            return ResponseEntity.ok(updatedRule);
+            return ResponseEntity.ok(toDto(updatedRule));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         } catch (IllegalArgumentException e) {
