@@ -113,6 +113,10 @@ public class GreenhouseService {
         return greenhouseRepository.findById(id);
     }
 
+    public Optional<GreenhouseSummary> getGreenhouseSummaryById(Integer id) {
+        return greenhouseRepository.findSummaryById(id);
+    }
+
     @Transactional
     public Greenhouse updateGreenhouse(Integer id, Greenhouse greenhouse) {
         greenhouse.setId(id);
@@ -133,6 +137,10 @@ public class GreenhouseService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Greenhouse ID not found for deletion.");
         }
         greenhouseRepository.deleteById(id);
+    }
+
+    public List<GreenhouseSummary> getGreenhousesSummaryByUserId(Integer userId) {
+        return greenhouseRepository.findSummaryByUserId(userId);
     }
 
     public List<Greenhouse> getGreenhousesByUserId(Integer userId) {

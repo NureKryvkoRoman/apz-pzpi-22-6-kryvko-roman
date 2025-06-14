@@ -56,8 +56,21 @@ public class GreenhouseController {
         }
     }
 
+    @GetMapping("/summary/user/{userId}")
+    @PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.id")
+    public ResponseEntity<List<GreenhouseSummary>> getGreenhousesSummaryByUserId(@PathVariable Integer userId) {
+        try {
+            List<GreenhouseSummary> greenhouses = greenhouseService.getGreenhousesSummaryByUserId(userId);
+            return ResponseEntity.ok(greenhouses);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @GetMapping("/user/{userId}")
-    @PreAuthorize("@authorizationService.canAccessGreenhouse(#id, authentication)")
+    @PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.id")
     public ResponseEntity<List<GreenhouseResponse>> getGreenhousesByUserId(@PathVariable Integer userId) {
         try {
             List<Greenhouse> greenhouses = greenhouseService.getGreenhousesByUserId(userId);
@@ -102,6 +115,16 @@ public class GreenhouseController {
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/summary/{id}")
+    @PreAuthorize("@authorizationService.canAccessGreenhouse(#id, authentication)")
+    public ResponseEntity<GreenhouseSummary> getGreenhouseSummaryById(@PathVariable Integer id) {
+        Optional<GreenhouseSummary> greenhouse = greenhouseService.getGreenhouseSummaryById(id);
+        if (greenhouse.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(greenhouse.get());
     }
 
     @GetMapping("/{id}")

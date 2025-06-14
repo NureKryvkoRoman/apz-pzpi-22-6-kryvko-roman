@@ -22,7 +22,7 @@ const GreenhouseList = () => {
     setLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:8080/api/greenhouses/user?email=${encodeURIComponent(user.email)}`,
+        `http://localhost:8080/api/greenhouses/summary/user/${user.id}`,
         {
           headers: {
             Authorization: `Bearer ${user.accessToken}`
@@ -84,7 +84,7 @@ const GreenhouseList = () => {
                       Longitude: {gh.longitude}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Sensors: {gh.sensors?.length ?? 0}
+                      Sensors: {gh.sensorCount}
                     </Typography>
                   </Box>
                 </CardContent>
