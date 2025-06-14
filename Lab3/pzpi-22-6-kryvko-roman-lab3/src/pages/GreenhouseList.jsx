@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Delete } from '@mui/icons-material';
 
 const GreenhouseList = () => {
@@ -118,7 +118,11 @@ const GreenhouseList = () => {
     if (user?.email) fetchGreenhouses();
   }, [user]);
 
-  if (!user) return null;
+  if (!user) return (
+    <Typography variant="h4" marginTop={'2rem'}>
+      Welcome to AutoGreenhouse! <i><Link to={'/login'}>Login</Link></i> or <i><Link to={'/register'}>Register</Link></i> to work with the website.
+    </Typography>
+  );
 
   return (
     <Container maxWidth="lg" sx={{ mt: 6 }}>

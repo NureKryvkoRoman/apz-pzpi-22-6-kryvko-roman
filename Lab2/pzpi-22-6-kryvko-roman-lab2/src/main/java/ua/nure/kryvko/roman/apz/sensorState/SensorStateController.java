@@ -44,7 +44,7 @@ public class SensorStateController {
     }
 
     @GetMapping("sensor/{id}")
-    @PreAuthorize("@authorizationService.canAccessSensorState(#id, authentication)")
+    @PreAuthorize("@authorizationService.canAccessSensor(#id, authentication)")
     public ResponseEntity<List<SensorStateResponse>> getSensorStatesBySensorId(@PathVariable Integer id) {
         try {
             return ResponseEntity.ok(sensorStateService.getSensorStateBySensorId(id).stream()
@@ -60,7 +60,7 @@ public class SensorStateController {
     }
 
     @GetMapping("greenhouse/{id}")
-    @PreAuthorize("@authorizationService.canAccessSensorState(#id, authentication)")
+    @PreAuthorize("@authorizationService.canAccessGreenhouse(#id, authentication)")
     public ResponseEntity<List<SensorStateResponse>> getSensorStatesByGreenhouseId(@PathVariable Integer id) {
         try {
             return ResponseEntity.ok(sensorStateService.getSensorStateByGreenhouseId(id).stream()
