@@ -2,24 +2,21 @@ import React, { useEffect, useState } from 'react';
 import {
   Container,
   Typography,
-  Card,
-  CardContent,
   Grid,
   TextField,
   Button,
   Box,
   Paper,
-  IconButton,
   Dialog,
   DialogActions,
   MenuItem,
   DialogContent,
   DialogTitle
 } from '@mui/material';
-import { Delete } from '@mui/icons-material';
 import { useParams } from 'react-router';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
+import SensorCard from '../components/SensorCard';
 
 const GreenhouseOverview = () => {
   const { greenhouseId } = useParams();
@@ -227,20 +224,10 @@ const GreenhouseOverview = () => {
         <Grid container spacing={2}>
           {sensors.map(sensor => (
             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={sensor.id}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6">{sensor.name}</Typography>
-                  <Typography variant="body2">Type: {sensor.sensorType}</Typography>
-                  <Typography variant="body2">Status: {sensor.isActive ? 'Active' : 'Inactive'}</Typography>
-                  <IconButton
-                    color="error"
-                    onClick={() => handleDeleteSensor(sensor.id)}
-                    sx={{ mt: 1 }}
-                  >
-                    <Delete />
-                  </IconButton>
-                </CardContent>
-              </Card>
+              <SensorCard
+                sensor={sensor}
+                onDelete={() => handleDeleteSensor(sensor.id)}
+              />
             </Grid>
           ))}
         </Grid>

@@ -35,7 +35,7 @@ const formatDate = (timestamp) => {
 const NotificationBlock = ({ notification, onMarkedRead }) => {
   const { user } = useAuth();
   const [isMarking, setIsMarking] = useState(false);
-  const [isRead, setIsRead] = useState(notification.isRead);
+  const [isRead, setIsRead] = useState(notification.read);
 
   const handleMarkAsRead = async () => {
     setIsMarking(true);

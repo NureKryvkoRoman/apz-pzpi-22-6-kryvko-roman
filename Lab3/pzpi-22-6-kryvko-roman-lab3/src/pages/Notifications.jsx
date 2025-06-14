@@ -60,7 +60,7 @@ const Notifications = () => {
           key={notif.id}
           notification={notif}
           onMarkedRead={(id) => setNotifications((prev) =>
-            prev.map(n => n.id === id ? { ...n, isRead: true } : n)
+            prev.map(n => n.id === id ? { ...n, read: true } : n)
           )}
         />
       ))}
