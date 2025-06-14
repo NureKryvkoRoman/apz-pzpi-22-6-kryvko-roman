@@ -4,12 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import ua.nure.kryvko.roman.apz.automationAction.AutomationAction;
-import ua.nure.kryvko.roman.apz.automationRuleDetails.AutomationRuleDetails;
+import ua.nure.kryvko.roman.apz.controller.Controller;
 import ua.nure.kryvko.roman.apz.greenhouse.Greenhouse;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @DynamicUpdate
@@ -21,29 +17,33 @@ public class AutomationRule {
     Integer id;
 
     @NotNull
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "greenhouse_id", referencedColumnName = "id")
     Greenhouse greenhouse;
+
+    @NotNull
+    @OneToOne
+    @JoinColumn(name = "controller_id", referencedColumnName = "id")
+    Controller controller;
 
     @NotNull
     String name;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
-    AutomationRuleType automationRuleType;
+    Double minValue;
 
-    @OneToOne(mappedBy = "automationRule")
-    AutomationRuleDetails automationRuleDetails;
-
-    @OneToMany(mappedBy = "automationRule")
-    List<AutomationAction> automationActions = new ArrayList<>();
+    @NotNull
+    Double maxValue;
 
     public AutomationRule() {}
 
-    public AutomationRule(Greenhouse greenhouse, String name, AutomationRuleType automationRuleType) {
+    public AutomationRule(Integer id, Greenhouse greenhouse, Controller controller, String name, Double minValue, Double maxValue) {
+        this.id = id;
         this.greenhouse = greenhouse;
+        this.controller = controller;
         this.name = name;
-        this.automationRuleType = automationRuleType;
+        this.minValue = minValue;
+        this.maxValue = maxValue;
     }
 
     public Integer getId() {
@@ -70,27 +70,27 @@ public class AutomationRule {
         this.name = name;
     }
 
-    public AutomationRuleType getAutomationRuleType() {
-        return automationRuleType;
+    public Controller getController() {
+        return controller;
     }
 
-    public void setAutomationRuleType(AutomationRuleType automationRuleType) {
-        this.automationRuleType = automationRuleType;
+    public void setController(Controller controller) {
+        this.controller = controller;
     }
 
-    public AutomationRuleDetails getAutomationRuleDetails() {
-        return automationRuleDetails;
+    public Double getMinValue() {
+        return minValue;
     }
 
-    public void setAutomationRuleDetails(AutomationRuleDetails automationRuleDetails) {
-        this.automationRuleDetails = automationRuleDetails;
+    public void setMinValue(Double minValue) {
+        this.minValue = minValue;
     }
 
-    public List<AutomationAction> getAutomationActions() {
-        return automationActions;
+    public Double getMaxValue() {
+        return maxValue;
     }
 
-    public void setAutomationActions(List<AutomationAction> automationActions) {
-        this.automationActions = automationActions;
+    public void setMaxValue(Double maxValue) {
+        this.maxValue = maxValue;
     }
 }

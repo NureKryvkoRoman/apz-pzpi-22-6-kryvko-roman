@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ua.nure.kryvko.roman.apz.controller.Controller;
 import ua.nure.kryvko.roman.apz.greenhouse.Greenhouse;
 import ua.nure.kryvko.roman.apz.greenhouse.GreenhouseRepository;
 
@@ -48,9 +49,10 @@ public class AutomationRuleControllerTest {
     @Test
     void createAutomationRule_shouldReturnCreatedWhenValid() throws Exception {
         Greenhouse greenhouse = new Greenhouse();
+        Controller controller = new Controller();
         greenhouse.setId(1);
 
-        AutomationRule automationRule = new AutomationRule(greenhouse, "Test Rule", AutomationRuleType.TIME);
+        AutomationRule automationRule = new AutomationRule(1, greenhouse, controller, "Test Rule", 0.1, 0.9);
 
         when(greenhouseRepository.existsById(1)).thenReturn(true);
         when(automationRuleService.createAutomationRule(any())).thenReturn(automationRule);
@@ -67,9 +69,10 @@ public class AutomationRuleControllerTest {
     @Test
     void createAutomationRule_shouldReturnBadRequestWhenGreenhouseDoesNotExist() throws Exception {
         Greenhouse greenhouse = new Greenhouse();
+        Controller controller = new Controller();
         greenhouse.setId(1);
 
-        AutomationRule automationRule = new AutomationRule(greenhouse, "Test Rule", AutomationRuleType.TIME);
+        AutomationRule automationRule = new AutomationRule(1, greenhouse, controller, "Test Rule", 0.1, 0.9);
 
         when(automationRuleService.createAutomationRule(any(AutomationRule.class)))
                 .thenThrow(new IllegalArgumentException("Greenhouse does not exist."));

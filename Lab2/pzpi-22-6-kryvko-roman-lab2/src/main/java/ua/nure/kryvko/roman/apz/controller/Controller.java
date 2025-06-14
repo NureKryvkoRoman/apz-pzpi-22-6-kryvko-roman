@@ -4,13 +4,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import ua.nure.kryvko.roman.apz.automationRule.AutomationRule;
 import ua.nure.kryvko.roman.apz.greenhouse.Greenhouse;
-import ua.nure.kryvko.roman.apz.automationAction.AutomationAction;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @DynamicUpdate
@@ -36,8 +34,8 @@ public class Controller {
     @Enumerated(EnumType.STRING)
     ControllerType controllerType;
 
-    @OneToMany(mappedBy = "controller")
-    List<AutomationAction> automationActions = new ArrayList<>();
+    @OneToOne(mappedBy = "controller")
+    AutomationRule automationAction;
 
     public Controller() {}
 
@@ -98,6 +96,10 @@ public class Controller {
     }
 
     public void run(Duration interval) {
+        //TODO: implement
+    }
+
+    public void run() {
         //TODO: implement
     }
 }

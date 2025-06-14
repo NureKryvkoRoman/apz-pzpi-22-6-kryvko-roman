@@ -5,9 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import ua.nure.kryvko.roman.apz.automationAction.AutomationAction;
-import ua.nure.kryvko.roman.apz.automationAction.AutomationActionService;
-import ua.nure.kryvko.roman.apz.automationRuleDetails.AutomationRuleDetails;
 import ua.nure.kryvko.roman.apz.greenhouse.Greenhouse;
 import ua.nure.kryvko.roman.apz.greenhouse.GreenhouseRepository;
 import ua.nure.kryvko.roman.apz.sensorState.SensorState;
@@ -20,14 +17,12 @@ public class AutomationRuleService {
 
     private final AutomationRuleRepository automationRuleRepository;
     private final GreenhouseRepository greenhouseRepository;
-    private final AutomationActionService automationActionService;
 
     @Autowired
     public AutomationRuleService(AutomationRuleRepository automationRuleRepository,
-                                 GreenhouseRepository greenhouseRepository, AutomationActionService automationActionService) {
+                                 GreenhouseRepository greenhouseRepository) {
         this.automationRuleRepository = automationRuleRepository;
         this.greenhouseRepository = greenhouseRepository;
-        this.automationActionService = automationActionService;
     }
 
     @Transactional
@@ -77,16 +72,12 @@ public class AutomationRuleService {
     public void checkSensorStateData(Greenhouse greenhouse, SensorState sensorState) {
         List<AutomationRule> rules = automationRuleRepository.findByGreenhouse(greenhouse);
         for (AutomationRule rule : rules) {
-            // apply only to sensor-dependent rules
-            if (rule.automationRuleType == AutomationRuleType.SENSOR) {
-                AutomationRuleDetails details = rule.getAutomationRuleDetails();
-                try {
-                    if (details.getMaxValue() < sensorState.getValue() || details.getMinValue() > sensorState.getValue()) {
-                        automationActionService.invokeActionWithRule(rule, details);
-                    }
-                } catch (NullPointerException e) {
-                    // do nothing
+            try {
+                if (rule.getMaxValue() < sensorState.getValue() || rule.getMinValue() > sensorState.getValue()) {
+                    rule.controller.run();
                 }
+            } catch (NullPointerException e) {
+                // do nothing
             }
         }
     }

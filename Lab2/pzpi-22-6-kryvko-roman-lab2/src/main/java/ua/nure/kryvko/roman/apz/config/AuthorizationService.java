@@ -3,12 +3,8 @@ package ua.nure.kryvko.roman.apz.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-import ua.nure.kryvko.roman.apz.automationAction.AutomationAction;
-import ua.nure.kryvko.roman.apz.automationAction.AutomationActionRepository;
 import ua.nure.kryvko.roman.apz.automationRule.AutomationRule;
 import ua.nure.kryvko.roman.apz.automationRule.AutomationRuleRepository;
-import ua.nure.kryvko.roman.apz.automationRuleDetails.AutomationRuleDetails;
-import ua.nure.kryvko.roman.apz.automationRuleDetails.AutomationRuleDetailsRepository;
 import ua.nure.kryvko.roman.apz.controller.Controller;
 import ua.nure.kryvko.roman.apz.controller.ControllerRepository;
 import ua.nure.kryvko.roman.apz.greenhouse.Greenhouse;
@@ -45,10 +41,6 @@ public class AuthorizationService {
     private NotificationRepository notificationRepository;
     @Autowired
     private AutomationRuleRepository automationRuleRepository;
-    @Autowired
-    private AutomationActionRepository automationActionRepository;
-    @Autowired
-    private AutomationRuleDetailsRepository automationRuleDetailsRepository;
 
     public boolean canAccessSensor(Integer sensorId, Authentication auth) {
         if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
@@ -170,33 +162,4 @@ public class AuthorizationService {
         return automationRule.getGreenhouse().getUser().getId().equals(user.getId());
     }
 
-    public boolean canAccessAutomationAction(Integer actionId, Authentication auth) {
-        if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-            return true;
-        }
-
-        Optional<AutomationAction> optionalAutomationAction = automationActionRepository.findById(actionId);
-        if (optionalAutomationAction.isEmpty()) {
-            return false;
-        }
-
-        AutomationAction automationAction = optionalAutomationAction.get();
-        CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-        return automationAction.getAutomationRule().getGreenhouse().getUser().getId().equals(user.getId());
-    }
-
-    public boolean canAccessAutomationRuleDetails(Integer detailsId, Authentication auth) {
-        if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-            return true;
-        }
-
-        Optional<AutomationRuleDetails> optionalAutomationRuleDetails = automationRuleDetailsRepository.findById(detailsId);
-        if (optionalAutomationRuleDetails.isEmpty()) {
-            return false;
-        }
-
-        AutomationRuleDetails automationAction = optionalAutomationRuleDetails.get();
-        CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-        return automationAction.getAutomationRule().getGreenhouse().getUser().getId().equals(user.getId());
-    }
 }
