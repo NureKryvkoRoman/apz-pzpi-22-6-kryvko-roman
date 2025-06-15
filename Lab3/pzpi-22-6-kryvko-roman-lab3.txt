@@ -1,0 +1,566 @@
+﻿Міністерство освіти і науки України
+Харківський національний університет радіоелектроніки
+Кафедра програмної інженерії
+
+
+ЗВІТ
+з лабораторної роботи №3
+з дисципліни «Архітектура програмного забезпечення»
+
+
+
+
+Виконав
+ст. гр. ПЗПІ-22-6
+Кривко Р. А.
+
+Перевірив
+ст. викладач кат. ПІ
+Сокорчук І.П.
+
+
+
+
+Харків 2025
+1 ІСТОРІЯ ЗМІН
+Таблиця 1.1 Історія змін
+№
+	Дата
+	Версія звіту
+	Опис змін та виправлень
+	1
+	02.06.2025
+	0.1
+	Створено основні розділи.
+	2
+	09.06.2025
+	0.2
+	Додано інформацію про проведену роботу.
+	3
+	12.06.2025
+	0.3
+	Додано посилання на відео на YouTube.
+	
+
+2 ЗАВДАННЯ
+Ця частина системи повинна підтримувати роботу клієнтів у веб-режимі та забезпечувати адміністрування системи.
+● Проаналізуйте завдання (додаток В).
+● Виконайте контрольні завдання п. 4.6.
+● Дайте відповідь на контрольні запитання п.4.7.
+● Відкрийте створений на попередній лабораторній роботі репозиторій  GitHub.
+● Створіть у репозиторії директорію Lab3 та текстовий файл з описом інженерних рішень у цій частині проєкту, як вказано у додатку З
+● Зафіксуйте кожну внесену зміну командою git commit з відповідним
+коментарем та фіксуйте цією командою усі наступні зміни у проєкті.
+● Створіть у директорії Task4 піддиректорію для програмного коду, як вказано у додатку З
+● Створіть програмний код, завантажте його у створену піддиректорію, зафіксуйте внесені у репозиторій зміни
+● Виконайте функціональне тестування створеного програмного коду та створіть відеозапис цього тестування тривалістю 7..10 хвилин з усними поясненнями процесу тестування
+● Завантажте створений відеозапис тестування YouTube канал для вашого облікового запису в домені @nure.ua
+● Створіть для завантаженого запису його хронологічний опис.
+● Оформіть звіт у форматі pdf та завантажте його на навчальну платформу https://dl.nure.ua/
+● У коментарях до завантаженого звіту вкажіть посилання на відеозапис тестування у вашому каналі YouTube.
+
+
+3 ОПИС ВИКОНАНОЇ РОБОТИ
+Веб-клієнт було розроблено за допомогою HTML та CSS для створення дизайну та загальної структури інтерфейсу, а також мови програмування JavaScript та бібліотеки React для динамічного оновлення вмісту веб-клієнта та інтерактивного функціоналу користувача.
+Для клієнтської частини системи було побудовано UML-діаграму прецедентів. Також було створено UML-діаграму компонентів та UML-діаграму пакетів.
+________________
+Додаток А
+Посилання на відеозапис та текст хронологічного опису відео
+
+Відеозапис доповіді на YouTube: https://youtu.be/e3AUmoK4Exo
+Хронологічний опис відеозапису:
+00:00 - Вступ
+00:11 - Завдання на лабораторну роботу
+00:20 - Тестування інтерфейсу користувача
+00:40 - Тестування авторизації
+01:25 - Тестування інтерфейсу теплиці
+03:00 - Тестування профілю користувача
+04:00 - Тестування сповіщень
+04:27 - Тестування панелі інструментів
+06:40 - Тестування адміністрування системи
+08:50 - Тестування адміністрування БД (резервне копіювання користувацьких даних)
+
+
+________________
+
+
+Додаток Б
+Графічні матеріали
+
+Рис. Б.1 - Use-Case діаграма прецедентів для користувача (перегляд даних)
+
+
+Рис. Б.2 - Use-Case діаграма прецедентів для користувача (управління теплицями)
+
+Б.3 - UML-діаграма пакетів
+
+Б.4 - UML-діаграма компонентів
+________________
+
+
+Додаток В
+Програмний код
+В.1 Математична обробка прикладних даних
+GitHub репозиторій: https://github.com/NureKryvkoRoman/apz-pzpi-22-6-kryvko-roman/blob/main/Lab3/pzpi-22-6-kryvko-roman-lab3/src/pages/Dashboard.jsx
+     1    import React, { useEffect, useState } from 'react';
+     2    import {
+     3      LineChart,
+     4      Line,
+     5      XAxis,
+     6      YAxis,
+     7      CartesianGrid,
+     8      Tooltip,
+     9      Legend,
+    10      ResponsiveContainer
+    11    } from 'recharts';
+    12    import { Box, Typography, CircularProgress } from '@mui/material';
+    13    import { useAuth } from '../context/AuthContext';
+    14    import { toast } from 'react-toastify';
+    15    import { useParams } from 'react-router';
+
+
+    16    const Dashboard = () => {
+    17      const { greenhouseId } = useParams();
+    18      const { user } = useAuth();
+    19      const [sensorData, setSensorData] = useState([]);
+    20      const [loading, setLoading] = useState(true);
+
+
+    21      useEffect(() => {
+    22        const fetchSensorStates = async () => {
+    23          try {
+    24            const res = await fetch(
+    25              `http://localhost:8080/api/sensor-states/greenhouse/${greenhouseId}`,
+    26              {
+    27                headers: {
+    28                  Authorization: `Bearer ${user.accessToken}`,
+    29                },
+    30              }
+    31            );
+
+
+    32            if (!res.ok) throw new Error('Failed to fetch sensor states');
+
+
+    33            const data = await res.json();
+    34            console.log(data);
+
+
+    35            // Group by sensorId
+    36            const grouped = data.reduce((acc, item) => {
+    37              const key = `${item.sensorId}-${item.unit}`;
+    38              if (!acc[key]) acc[key] = [];
+    39              acc[key].push({
+    40                ...item,
+    41                timestamp: new Date(item.timestamp).toLocaleString(),
+    42              });
+    43              return acc;
+    44            }, {});
+
+
+    45            setSensorData(grouped);
+    46          } catch (err) {
+    47            console.error(err);
+    48            toast.error('Error loading sensor data');
+    49          } finally {
+    50            setLoading(false);
+    51          }
+    52        };
+
+
+    53        if (user?.accessToken) fetchSensorStates();
+    54      }, [user, greenhouseId]);
+
+
+    55      if (loading) {
+    56        return (
+    57          <Box display="flex" justifyContent="center" mt={4}>
+    58            <CircularProgress />
+    59          </Box>
+    60        );
+    61      }
+
+
+    62      return (
+    63        <Box mt={4}>
+    64          <Typography variant="h4" gutterBottom>
+    65            Sensor Dashboard
+    66          </Typography>
+    67          {Object.entries(sensorData).map(([key, entries]) => {
+    68            const mean =
+    69              entries.reduce((acc, curr) => acc + curr.value, 0) / entries.length;
+
+
+    70            return (
+    71              <Box key={key} mt={4}>
+    72                <Typography variant="h6">
+    73                  Sensor ID: {entries[0].sensorId} ({entries[0].unit})
+    74                </Typography>
+    75                <ResponsiveContainer width="100%" height={300}>
+    76                  <LineChart data={entries}>
+    77                    <CartesianGrid strokeDasharray="3 3" />
+    78                    <XAxis dataKey="timestamp" interval={Math.ceil(entries.length / 5)} />
+    79                    <YAxis />
+    80                    <Tooltip />
+    81                    <Legend />
+    82                    <Line type="monotone" dataKey="value" stroke="#8884d8" dot={false} />
+    83                  </LineChart>
+    84                </ResponsiveContainer>
+    85                <Typography variant="body2" mt={1}>
+    86                  Mean value: <strong>{mean.toFixed(2)}</strong>
+    87                </Typography>
+    88              </Box>
+    89            );
+    90          })}
+    91        </Box>
+    92      );
+    93    };
+
+
+    94    export default Dashboard;
+
+
+В.2 Адміністрування бізнес-логіки системи
+GitHub репозиторій: https://github.com/NureKryvkoRoman/apz-pzpi-22-6-kryvko-roman/blob/main/Lab3/pzpi-22-6-kryvko-roman-lab3/src/pages/AdminDashboard.jsx
+     1    import React, { useEffect, useState } from 'react';
+     2    import {
+     3      Container, Typography, Paper, Table, TableHead, TableRow, TableCell, TableBody,
+     4      IconButton, Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button
+     5    } from '@mui/material';
+     6    import { Edit, Delete } from '@mui/icons-material';
+     7    import { toast } from 'react-toastify';
+     8    import { useAuth } from '../context/AuthContext';
+     9    import { useNavigate } from 'react-router';
+
+
+    10    const AdminDashboard = () => {
+    11      const { user } = useAuth();
+    12      const navigate = useNavigate();
+    13      const [users, setUsers] = useState([]);
+    14      const [editUser, setEditUser] = useState(null);
+    15      const [formData, setFormData] = useState({ login: '', email: '', role: 'USER' });
+    16      const [createOpen, setCreateOpen] = useState(false);
+    17      const [createForm, setCreateForm] = useState({
+    18        login: '',
+    19        email: '',
+    20        password: '',
+    21        role: 'USER',
+    22      });
+
+
+    23      const fetchUsers = async () => {
+    24        try {
+    25          const res = await fetch('http://localhost:8080/api/user', {
+    26            headers: { Authorization: `Bearer ${user.accessToken}` },
+    27          });
+    28          if (!res.ok) throw new Error('Failed to load users');
+    29          const data = await res.json();
+    30          console.log(data)
+    31          setUsers(data);
+    32        } catch (err) {
+    33          toast.error('Error fetching users');
+    34        }
+    35      };
+
+
+    36      useEffect(() => {
+    37        if (user?.role !== 'ADMIN') {
+    38          navigate('/login');
+    39        }
+    40        fetchUsers();
+    41      }, [user]);
+
+
+    42      const handleEdit = (u) => {
+    43        setEditUser(u);
+    44        setFormData({ login: u.username, email: u.email, role: u.role });
+    45      };
+
+
+    46      const isEmail = (email) => {
+    47        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    48      };
+
+
+    49      const handleCreateUser = async () => {
+    50        if (!isEmail(createForm.email)) {
+    51          toast.error('Please enter a valid email address');
+    52          return;
+    53        }
+
+
+    54        try {
+    55          const res = await fetch(`http://localhost:8080/api/user`, {
+    56            method: 'POST',
+    57            headers: {
+    58              'Content-Type': 'application/json',
+    59              Authorization: `Bearer ${user.accessToken}`,
+    60            },
+    61            body: JSON.stringify(createForm),
+    62          });
+    63          if (!res.ok) throw new Error('User creation failed');
+    64          toast.success('User created');
+    65          setCreateOpen(false);
+    66          setCreateForm({ username: '', email: '', password: '', role: 'USER' });
+    67          fetchUsers();
+    68        } catch (err) {
+    69          toast.error('Error creating user');
+    70        }
+    71      };
+
+
+    72      const handleUpdate = async () => {
+    73        if (!isEmail(formData.email)) {
+    74          toast.error('Please enter a valid email address');
+    75          return;
+    76        }
+
+
+    77        try {
+    78          const res = await fetch(`http://localhost:8080/api/user/${editUser.id}`, {
+    79            method: 'PATCH',
+    80            headers: {
+    81              'Content-Type': 'application/json',
+    82              Authorization: `Bearer ${user.accessToken}`,
+    83            },
+    84            body: JSON.stringify({ ...editUser, ...formData }),
+    85          });
+    86          if (!res.ok) throw new Error('Update failed');
+    87          toast.success('User updated');
+    88          setEditUser(null);
+    89          fetchUsers();
+    90        } catch (err) {
+    91          toast.error('Error updating user');
+    92        }
+    93      };
+
+
+    94      const handleDelete = async (id) => {
+    95        if (!window.confirm('Are you sure you want to delete this user?')) return;
+    96        try {
+    97          const res = await fetch(`http://localhost:8080/api/user/${id}`, {
+    98            method: 'DELETE',
+    99            headers: {
+   100              Authorization: `Bearer ${user.accessToken}`,
+   101            },
+   102          });
+   103          if (!res.ok) throw new Error('Delete failed');
+   104          toast.success('User deleted');
+   105          fetchUsers();
+   106        } catch (err) {
+   107          toast.error('Error deleting user');
+   108        }
+   109      };
+
+
+   110      return (
+   111        <Container sx={{ mt: 4 }}>
+   112          <Typography variant="h4" gutterBottom>Admin Dashboard</Typography>
+   113          <Paper>
+   114            <Table>
+   115              <TableHead>
+   116                <TableRow>
+   117                  <TableCell>User ID</TableCell>
+   118                  <TableCell>Username</TableCell>
+   119                  <TableCell>Email</TableCell>
+   120                  <TableCell>Role</TableCell>
+   121                  <TableCell align="right">Actions</TableCell>
+   122                </TableRow>
+   123              </TableHead>
+   124              <TableBody>
+   125                {users.map(u => (
+   126                  <TableRow key={u.id}>
+   127                    <TableCell>{u.id}</TableCell>
+   128                    <TableCell>{u.username}</TableCell>
+   129                    <TableCell>{u.email}</TableCell>
+   130                    <TableCell>{u.role}</TableCell>
+   131                    <TableCell align="right">
+   132                      <IconButton color="primary" onClick={() => handleEdit(u)}>
+   133                        <Edit />
+   134                      </IconButton>
+   135                      <IconButton color="error" onClick={() => handleDelete(u.id)}>
+   136                        <Delete />
+   137                      </IconButton>
+   138                    </TableCell>
+   139                  </TableRow>
+   140                ))}
+   141              </TableBody>
+   142            </Table>
+   143          </Paper>
+
+
+   144          <Button variant="contained" sx={{ mt: 2 }} onClick={() => setCreateOpen(true)}>
+   145            Create New User
+   146          </Button>
+
+
+   147          <Dialog open={createOpen} onClose={() => setCreateOpen(false)}>
+   148            <DialogTitle>Create User</DialogTitle>
+   149            <DialogContent>
+   150              <TextField
+   151                fullWidth margin="normal" label="Username"
+   152                value={createForm.login}
+   153                onChange={(e) => setCreateForm({ ...createForm, login: e.target.value })}
+   154              />
+   155              <TextField
+   156                fullWidth margin="normal" label="Email"
+   157                value={createForm.email}
+   158                onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+   159              />
+   160              <TextField
+   161                fullWidth margin="normal" label="Password" type="password"
+   162                value={createForm.password}
+   163                onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+   164              />
+   165              <TextField
+   166                fullWidth margin="normal" label="Role"
+   167                select SelectProps={{ native: true }}
+   168                value={createForm.role}
+   169                onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })}
+   170              >
+   171                <option value="USER">USER</option>
+   172                <option value="ADMIN">ADMIN</option>
+   173              </TextField>
+   174            </DialogContent>
+   175            <DialogActions>
+   176              <Button onClick={() => setCreateOpen(false)}>Cancel</Button>
+   177              <Button variant="contained" onClick={handleCreateUser}>Create</Button>
+   178            </DialogActions>
+   179          </Dialog>
+
+
+   180          <Dialog open={!!editUser} onClose={() => setEditUser(null)}>
+   181            <DialogTitle>Edit User</DialogTitle>
+   182            <DialogContent>
+   183              <TextField
+   184                fullWidth margin="normal" label="Username"
+   185                value={formData.login}
+   186                onChange={(e) => setFormData({ ...formData, login: e.target.value })}
+   187              />
+   188              <TextField
+   189                fullWidth margin="normal" label="Email"
+   190                value={formData.email}
+   191                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+   192              />
+   193              <TextField
+   194                fullWidth margin="normal" label="Role"
+   195                select
+   196                slotProps={{ select: { native: true } }}
+   197                value={formData.role}
+   198                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+   199              >
+   200                <option value="USER">USER</option>
+   201                <option value="ADMIN">ADMIN</option>
+   202              </TextField>
+   203            </DialogContent>
+   204            <DialogActions>
+   205              <Button onClick={() => setEditUser(null)}>Cancel</Button>
+   206              <Button variant="contained" onClick={handleUpdate}>Save</Button>
+   207            </DialogActions>
+   208          </Dialog>
+   209        </Container>
+   210      );
+   211    };
+
+
+   212    export default AdminDashboard;
+
+
+В.3 Резервне копіювання користувацьких даних
+GitHub репозиторій: https://github.com/NureKryvkoRoman/apz-pzpi-22-6-kryvko-roman/blob/main/Lab3/pzpi-22-6-kryvko-roman-lab3/src/pages/BackupPage.jsx
+     1    import BackupIcon from '@mui/icons-material/Backup';
+     2    import RestoreIcon from '@mui/icons-material/Restore';
+     3    import React, { useState } from 'react';
+     4    import { Container, Typography, Button, Box, CircularProgress } from '@mui/material';
+     5    import { toast } from 'react-toastify';
+     6    import { useAuth } from '../context/AuthContext';
+
+
+     7    const BackupPage = () => {
+     8      const { user } = useAuth();
+     9      const [loading, setLoading] = useState(false);
+    10      const [result, setResult] = useState('');
+
+
+    11      const handleAction = async (endpoint) => {
+    12        setLoading(true);
+    13        setResult('');
+    14        try {
+    15          const res = await fetch(`http://localhost:8080/api/admin/${endpoint}`, {
+    16            method: 'POST',
+    17            headers: {
+    18              Authorization: `Bearer ${user.accessToken}`,
+    19            },
+    20          });
+
+
+    21          if (!res.ok) throw new Error(`Failed to ${endpoint}`);
+
+
+    22          const text = await res.text();
+    23          setResult(text);
+    24          toast.success(`${endpoint.charAt(0).toUpperCase() + endpoint.slice(1)} completed`);
+    25        } catch (err) {
+    26          console.error(err);
+    27          toast.error(`Error during ${endpoint}`);
+    28        } finally {
+    29          setLoading(false);
+    30        }
+    31      };
+
+
+    32      if (!user || user.role !== 'ADMIN') return null;
+
+
+    33      return (
+    34        <Container maxWidth="sm" sx={{ mt: 6 }}>
+    35          <Typography variant="h4" gutterBottom>
+    36            Backup & Restore
+    37          </Typography>
+
+
+    38          <Box display="flex" justifyContent="space-between" mt={3} gap={2}>
+    39            <Button
+    40              variant="contained"
+    41              color="primary"
+    42              fullWidth={true}
+    43              onClick={() => handleAction('backup')}
+    44              disabled={loading}
+    45              startIcon={<BackupIcon />}
+    46            >
+    47              Backup
+    48            </Button>
+    49            <Button
+    50              variant="contained"
+    51              color="secondary"
+    52              fullWidth={true}
+    53              onClick={() => handleAction('restore')}
+    54              disabled={loading}
+    55              startIcon={<RestoreIcon />}
+    56            >
+    57              Restore
+    58            </Button>
+    59          </Box>
+
+
+    60          {loading && (
+    61            <Box mt={4} textAlign="center">
+    62              <CircularProgress />
+    63            </Box>
+    64          )}
+
+
+    65          {result && (
+    66            <Box mt={4}>
+    67              <Typography variant="subtitle1" gutterBottom>
+    68                Result:
+    69              </Typography>
+    70              <Typography variant="body1">{result}</Typography>
+    71            </Box>
+    72          )}
+    73        </Container>
+    74      );
+    75    };
+
+
+    76    export default BackupPage;

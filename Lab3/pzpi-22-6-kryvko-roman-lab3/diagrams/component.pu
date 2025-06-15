@@ -1,0 +1,51 @@
+@startuml FrontendComponentDiagram
+skinparam componentStyle rectangle
+
+package "Pages" {
+  [GreenhouseList]
+  [Dashboard]
+  [GreenhouseOverview]
+  [UserProfile]
+  [Login]
+  [Register]
+  [AdminDashboard]
+  [BackupPage]
+  [Notifications]
+  [NotFound]
+}
+
+package "Components" {
+  [Header]
+  [SensorCard]
+  [ControllerCard]
+  [AutomationRuleCard]
+  [NotificationBlock]
+  [AdminRoute]
+}
+
+package "Context" {
+  [AuthContext]
+}
+
+[App] --> [Header]
+[App] --> [GreenhouseList]
+[App] --> [Dashboard]
+[App] --> [Login]
+[App] --> [Register]
+[App] --> [UserProfile]
+[App] --> [AdminDashboard]
+[App] --> [BackupPage]
+[App] --> [GreenhouseOverview]
+[App] --> [Notifications]
+[App] --> [NotFound]
+
+[GreenhouseOverview] --> [SensorCard]
+[GreenhouseOverview] --> [ControllerCard]
+[GreenhouseOverview] --> [AutomationRuleCard]
+[Dashboard] --> [SensorCard]
+[Notifications] --> [NotificationBlock]
+
+[AdminDashboard] --> [AdminRoute]
+[App] --> [AuthContext]
+[Header] --> [AuthContext]
+@enduml

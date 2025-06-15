@@ -1,0 +1,56 @@
+@startuml FrontendPackageDiagram
+skinparam packageStyle rectangle
+
+package "src" {
+  package "components" {
+    class Header
+    class SensorCard
+    class ControllerCard
+    class AutomationRuleCard
+    class NotificationBlock
+    class AdminRoute
+  }
+
+  package "pages" {
+    class GreenhouseList
+    class Dashboard
+    class GreenhouseOverview
+    class UserProfile
+    class Login
+    class Register
+    class AdminDashboard
+    class BackupPage
+    class Notifications
+    class NotFound
+  }
+
+  package "context" {
+    class AuthContext
+  }
+
+  class App
+  class main
+}
+
+App --> Header
+App --> GreenhouseList
+App --> Dashboard
+App --> Login
+App --> Register
+App --> UserProfile
+App --> AdminDashboard
+App --> BackupPage
+App --> Notifications
+App --> NotFound
+
+GreenhouseOverview --> SensorCard
+GreenhouseOverview --> ControllerCard
+GreenhouseOverview --> AutomationRuleCard
+Dashboard --> SensorCard
+Notifications --> NotificationBlock
+
+App --> AuthContext
+Header --> AuthContext
+AdminDashboard --> AdminRoute
+main --> App
+@enduml
