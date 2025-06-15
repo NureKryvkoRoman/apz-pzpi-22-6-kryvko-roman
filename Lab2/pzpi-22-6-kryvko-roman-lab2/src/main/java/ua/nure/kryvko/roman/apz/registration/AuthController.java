@@ -64,7 +64,8 @@ public class AuthController {
                     tokens.get("accessToken"),
                     tokens.get("refreshToken"),
                     user.getEmail(),
-                    user.getLogin()
+                    user.getLogin(),
+                    user.getRole()
             );
 
             return ResponseEntity.ok(loginResponse);
@@ -119,7 +120,8 @@ public class AuthController {
                 tokens.get("accessToken"),
                 tokens.get("refreshToken"),
                 newUser.getEmail(),
-                newUser.getLogin()
+                newUser.getLogin(),
+                newUser.getRole()
         );
         return new ResponseEntity<>(signUpResponse, HttpStatus.CREATED);
     }

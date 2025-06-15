@@ -3,6 +3,7 @@ package ua.nure.kryvko.roman.apz.user;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -12,6 +13,9 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+
+    @Autowired
+    PasswordEncoder encoder;
 
     @Autowired
     public UserService(UserRepository userRepository) {
@@ -30,11 +34,12 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    public void saveUser(User user) {
+    public User saveUser(User user) {
         if (userRepository.existsByEmail(user.getEmail()) || userRepository.existsByLogin(user.getLogin())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT);
         }
-        userRepository.save(user);
+        user.setPassword(encoder.encode(user.getPassword()));
+        return userRepository.save(user);
     }
 
     @Transactional
@@ -44,6 +49,14 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         user.setId(id);
+
+        // Update password if provided, else fetch existing hash
+        if (user.getPassword() != null) {
+            user.setPassword(encoder.encode(user.getPassword()));
+        } else {
+            user.setPassword(optionalUser.get().getPassword());
+        }
+
         userRepository.save(user);
     }
 

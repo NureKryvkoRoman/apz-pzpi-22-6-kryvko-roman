@@ -1,9 +1,11 @@
 package ua.nure.kryvko.roman.apz.user;
 
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -47,18 +49,17 @@ public class UserController {
 
     @PostMapping("")
     @PreAuthorize("hasRole('ADMIN')")
-    ResponseEntity<Void> create(@Valid @RequestBody User user) {
+    ResponseEntity<UserResponse> create(@Valid @RequestBody User user) {
         try {
-            userService.saveUser(user);
+            return new ResponseEntity<>(toDto(userService.saveUser(user)), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
-    ResponseEntity<Void> update(@Valid @RequestBody User user, @PathVariable Integer id) {
+    ResponseEntity<Void> update(@RequestBody User user, @PathVariable Integer id) {
         try {
             userService.updateUser(user, id);
         } catch (ResponseStatusException e) {

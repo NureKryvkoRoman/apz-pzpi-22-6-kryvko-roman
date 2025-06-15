@@ -10,6 +10,9 @@ import './App.css'
 import { BrowserRouter, Route, Routes } from 'react-router'
 import { ToastContainer } from 'react-toastify'
 import Header from './components/Header.jsx'
+import AdminRoute from './components/AdminRoute.jsx'
+import AdminDashboard from './pages/AdminDashboard.jsx'
+import BackupPage from './pages/BackupPage.jsx'
 
 function App() {
   return (
@@ -21,9 +24,26 @@ function App() {
           <Route path="register" element={<Register />} />
 
           <Route path="/" element={<GreenhouseList />} />
-          <Route path="greenhouses/:greenhouseId" element={<GreenhouseOverview />} />
+          <Route path="/greenhouses/:greenhouseId" element={<GreenhouseOverview />} />
           <Route path="/dashboard/:greenhouseId" element={<Dashboard />} />
-          <Route path="profile" element={<UserProfile />} />
+          <Route path="/profile" element={<UserProfile />} />
+
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/backup"
+            element={
+              <AdminRoute>
+                <BackupPage />
+              </AdminRoute>
+            }
+          />
 
           <Route path="*" element={<NotFound />} />
         </Routes>

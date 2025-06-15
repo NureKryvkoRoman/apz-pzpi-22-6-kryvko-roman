@@ -14,13 +14,14 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(false);
   }, []);
 
-  const login = (id, email, username, accessToken, refreshToken) => {
+  const login = (id, email, username, accessToken, refreshToken, role) => {
     const user = {
       id: id,
       email: email,
       username: username,
       accessToken: accessToken,
-      refreshToken: refreshToken
+      refreshToken: refreshToken,
+      role: role
     };
     localStorage.setItem('user', JSON.stringify(user));
     setUser(user);

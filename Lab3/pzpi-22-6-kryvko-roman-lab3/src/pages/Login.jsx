@@ -31,8 +31,8 @@ const Login = () => {
         toast.error(`Error ${res.status}: ${error}`);
       } else {
         toast.success('Login successful!');
-        const { id, email, username, accessToken, refreshToken } = data;
-        login(id, email, username, accessToken, refreshToken);
+        const { id, email, username, accessToken, refreshToken, role } = data;
+        login(id, email, username, accessToken, refreshToken, role);
         navigate('/');
       }
     } catch (err) {

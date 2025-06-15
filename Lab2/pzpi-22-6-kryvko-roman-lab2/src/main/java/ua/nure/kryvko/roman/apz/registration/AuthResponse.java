@@ -1,23 +1,27 @@
 package ua.nure.kryvko.roman.apz.registration;
 
+import ua.nure.kryvko.roman.apz.user.UserRole;
+
 public class AuthResponse {
     Integer id;
     String accessToken;
     String refreshToken;
     String email;
     String username;
+    UserRole role;
     String error;
 
     public AuthResponse(String error) {
         this.error = error;
     }
 
-    public AuthResponse(Integer id, String accessToken, String refreshToken, String email, String username) {
+    public AuthResponse(Integer id, String accessToken, String refreshToken, String email, String username, UserRole role) {
         this.id = id;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.email = email;
         this.username = username;
+        this.role = role;
     }
 
     public Integer getId() {
@@ -68,4 +72,11 @@ public class AuthResponse {
         this.error = error;
     }
 
+    public UserRole getRole() {
+        return role;
+    }
+
+    public void setRole(UserRole role) {
+        this.role = role;
+    }
 }

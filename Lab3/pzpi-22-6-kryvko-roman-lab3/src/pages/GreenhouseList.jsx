@@ -115,6 +115,11 @@ const GreenhouseList = () => {
   };
 
   useEffect(() => {
+    if (user?.role === 'ADMIN') {
+      navigate('/admin');
+      return;
+    }
+
     if (user?.email) fetchGreenhouses();
   }, [user]);
 
@@ -123,6 +128,8 @@ const GreenhouseList = () => {
       Welcome to AutoGreenhouse! <i><Link to={'/login'}>Login</Link></i> or <i><Link to={'/register'}>Register</Link></i> to work with the website.
     </Typography>
   );
+
+  if (user?.role === 'ADMIN') return null;
 
   return (
     <Container maxWidth="lg" sx={{ mt: 6 }}>
