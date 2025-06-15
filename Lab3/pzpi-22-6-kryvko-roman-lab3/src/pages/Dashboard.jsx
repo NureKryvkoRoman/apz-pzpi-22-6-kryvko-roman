@@ -73,23 +73,31 @@ const Dashboard = () => {
       <Typography variant="h4" gutterBottom>
         Sensor Dashboard
       </Typography>
-      {Object.entries(sensorData).map(([key, entries]) => (
-        <Box key={key} mt={4}>
-          <Typography variant="h6">
-            Sensor ID: {entries[0].sensorId} ({entries[0].unit})
-          </Typography>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={entries}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="timestamp" interval={Math.ceil(entries.length / 5)} />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="value" stroke="#8884d8" dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </Box>
-      ))}
+      {Object.entries(sensorData).map(([key, entries]) => {
+        const mean =
+          entries.reduce((acc, curr) => acc + curr.value, 0) / entries.length;
+
+        return (
+          <Box key={key} mt={4}>
+            <Typography variant="h6">
+              Sensor ID: {entries[0].sensorId} ({entries[0].unit})
+            </Typography>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={entries}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="timestamp" interval={Math.ceil(entries.length / 5)} />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="value" stroke="#8884d8" dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+            <Typography variant="body2" mt={1}>
+              Mean value: <strong>{mean.toFixed(2)}</strong>
+            </Typography>
+          </Box>
+        );
+      })}
     </Box>
   );
 };
